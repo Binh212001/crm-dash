@@ -1,0 +1,204 @@
+### CUSTOMER
+POST http://localhost:8000/customer
+Content-Type: application/json
+
+{
+  "name": "Carry Anna",
+  "email": "annac34@gmail.com",
+  "orders": 89,
+  "totalSpent": 23987,
+  "city": "Budapest",
+  "lastSeen": "2023-12-12T12:56:00.000Z",
+  "lastOrder": "2023-12-12T12:56:00.000Z",
+  "avatar": "https://example.com/avatar.jpg"
+}
+
+###
+GET http://localhost:8000/customer
+
+###
+GET http://localhost:8000/customer/{{customerId}}
+
+###
+PUT http://localhost:8000/customer/{{customerId}}
+Content-Type: application/json
+
+{
+  "city": "Budapest Updated"
+}
+
+###
+DELETE http://localhost:8000/customer/{{customerId}}
+
+
+### USER
+POST http://localhost:8000/user
+Content-Type: application/json
+
+{
+  "username": "carryanna",
+  "firstName": "Carry",
+  "lastName": "Anna",
+  "email": "annac34@gmail.com",
+  "password": "password123"
+}
+
+###
+GET http://localhost:8000/user
+
+###
+GET http://localhost:8000/user/{{userId}}
+
+###
+PUT http://localhost:8000/user/{{userId}}
+Content-Type: application/json
+
+{
+  "firstName": "Carry Updated"
+}
+
+###
+DELETE http://localhost:8000/user/{{userId}}
+
+
+### TAG
+POST http://localhost:8000/tag
+Content-Type: application/json
+
+{
+  "name": "VIP",
+  "description": "VIP customer"
+}
+
+###
+GET http://localhost:8000/tag
+
+###
+GET http://localhost:8000/tag/{{tagId}}
+
+###
+PUT http://localhost:8000/tag/{{tagId}}
+Content-Type: application/json
+
+{
+  "description": "Updated description"
+}
+
+###
+DELETE http://localhost:8000/tag/{{tagId}}
+
+
+### CATEGORY
+POST http://localhost:8000/category
+Content-Type: application/json
+
+{
+  "name": "Electronics",
+  "description": "Electronic products"
+}
+
+###
+GET http://localhost:8000/category
+
+###
+GET http://localhost:8000/category/{{categoryId}}
+
+###
+PUT http://localhost:8000/category/{{categoryId}}
+Content-Type: application/json
+
+{
+  "description": "Updated description"
+}
+
+###
+DELETE http://localhost:8000/category/{{categoryId}}
+
+
+### PRODUCT VARIANT
+POST http://localhost:8000/product-variant
+Content-Type: application/json
+
+{
+  "sku": "SKU123",
+  "price": 199.99,
+  "values": ["Red", "Large"]
+}
+
+###
+GET http://localhost:8000/product-variant
+
+###
+GET http://localhost:8000/product-variant/{{variantId}}
+
+###
+PUT http://localhost:8000/product-variant/{{variantId}}
+Content-Type: application/json
+
+{
+  "price": 149.99
+}
+
+###
+DELETE http://localhost:8000/product-variant/{{variantId}}
+
+
+### VARIANT ATTRIBUTE
+POST http://localhost:8000/variant-attribute
+Content-Type: application/json
+
+{
+  "name": "Color",
+  "values": ["Red", "Blue", "Green"]
+}
+
+###
+GET http://localhost:8000/variant-attribute
+
+###
+GET http://localhost:8000/variant-attribute/{{attributeId}}
+
+###
+PUT http://localhost:8000/variant-attribute/{{attributeId}}
+Content-Type: application/json
+
+{
+  "name": "Size"
+}
+
+###
+DELETE http://localhost:8000/variant-attribute/{{attributeId}}
+
+
+### PRODUCT
+POST http://localhost:8000/products
+Content-Type: application/json
+
+{
+  "name": "Product A",
+  "description": "Mô tả sản phẩm A",
+  "categoryId": "uuid-category",
+  "vendor": "Vendor X",
+  "collection": "Collection Y",
+  "tags": ["tag1", "tag2"],
+  "productVariant": []
+}
+
+###
+GET http://localhost:8000/products
+
+###
+GET http://localhost:8000/products/{{productId}}
+
+###
+PUT http://localhost:8000/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Product A Updated",
+  "description": "Mô tả mới",
+  "tags": ["tag1", "tag3"]
+}
+
+###
+DELETE http://localhost:8000/products/{{productId}}
