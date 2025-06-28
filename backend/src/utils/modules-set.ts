@@ -7,6 +7,8 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ClsModule } from "nestjs-cls";
 import { BullModule } from "@nestjs/bull";
+import { ClientsModule } from "@nestjs/microservices";
+import { Transport } from "@nestjs/microservices";
 import path from "path";
 import { DataSource, DataSourceOptions } from "typeorm";
 import {
@@ -14,6 +16,8 @@ import {
   initializeTransactionalContext,
   StorageDriver,
 } from "typeorm-transactional";
+import { EventModule } from "@/events/event.module";
+import { BackgroundModule } from "@/background/background.module";
 
 function generateModulesSet() {
   const imports: ModuleMetadata["imports"] = [
@@ -25,6 +29,7 @@ function generateModulesSet() {
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, "../../../", "public"),
     }),
+    BackgroundModule
   ];
 
   const redisModule = BullModule.forRootAsync({
@@ -66,7 +71,7 @@ function generateModulesSet() {
     }),
   });
 
-  const customModules = [clsModule, dbModule, redisModule, ApiModule];
+  const customModules = [clsModule, dbModule, redisModule, ApiModule , EventModule];
 
   return imports.concat(customModules);
 }

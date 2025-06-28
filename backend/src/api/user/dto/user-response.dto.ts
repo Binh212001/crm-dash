@@ -1,4 +1,5 @@
-import { Expose } from 'class-transformer';
+import { RoleResponseDto } from '@/api/permissions/dto/role-response.dto';
+import { Expose, Type } from 'class-transformer';
 
 export class UserResponseDto {
   @Expose()
@@ -42,4 +43,6 @@ export class UserResponseDto {
 
   @Expose()
   socialId?: string;
+  @Type(()=>RoleResponseDto)
+  role : RoleResponseDto
 } 

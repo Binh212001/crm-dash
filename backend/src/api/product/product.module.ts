@@ -17,10 +17,11 @@ import { VariantAttributeService } from './service/variant-attribute.service';
 import { CategoryController } from './category.controller';
 import { ProductVariantController } from './product-variant.controller';
 import { VariantAttributeController } from './variant-attribute.controller';
+import { TagModule } from '../tag/tag.module';
 
 @Module({
   imports: [
-    
+    TagModule
   ],
   providers: [
     ProductRepository,

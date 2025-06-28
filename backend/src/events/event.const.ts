@@ -1,0 +1,1 @@
+export const ON_ORDER_SUCCESS = "order.success";

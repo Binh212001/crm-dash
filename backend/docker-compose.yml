@@ -47,6 +47,18 @@ services:
     mem_limit: 2g # Limit memory usage to 2GB
     networks:
       - crm-backend-network
+      
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"      # Cổng AMQP
+      - "15672:15672"    # Giao diện quản trị web
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - crm-backend-network
 
   # elasticsearch:
   #   image: elasticsearch_with_analysis_vietnamese

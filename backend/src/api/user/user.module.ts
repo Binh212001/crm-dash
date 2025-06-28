@@ -1,12 +1,26 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { UserRepository } from './user.repository';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './entities/user.entity';
+import { UserService } from './user.service';
+import { ClientsModule, Transport } from "@nestjs/microservices";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity])],
+  imports: [
+    ClientsModule.register([
+      {
+        name: 'EMAIL_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'cats_queue',
+          queueOptions: {
+            durable: false
+          },
+        },
+      },
+    ]),
+  
+  ],
   providers: [UserService, UserRepository],
   controllers: [UserController],
   exports: [UserService, UserRepository],

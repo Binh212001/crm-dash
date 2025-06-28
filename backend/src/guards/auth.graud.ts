@@ -1,6 +1,7 @@
-// import { TokenService } from "@/api/auth/token.service";
-// import { UserService } from "@/api/user/user.service";
-import { IS_AUTH_OPTIONAL, IS_PUBLIC } from "@/constants/app.constant";
+
+import { JwtService } from "@/api/auth/services/jwt.service";
+import { UserService } from "@/api/user/user.service";
+import { IS_PUBLIC } from "@/constants/app.constant";
 import {
   CanActivate,
   ExecutionContext,
@@ -13,7 +14,9 @@ import { Request } from "express";
 @Injectable({ scope: Scope.REQUEST })
 export class AuthGuard implements CanActivate {
   constructor(
-    private reflector: Reflector // private tokenService: TokenService, // private userService: UserService
+    private reflector: Reflector ,
+     private tokenService: JwtService,
+      private userService: UserService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -24,23 +27,16 @@ export class AuthGuard implements CanActivate {
 
     if (isPublic) return true;
 
-    const isAuthOptional = this.reflector.getAllAndOverride<boolean>(
-      IS_AUTH_OPTIONAL,
-      [context.getHandler(), context.getClass()]
-    );
-
+    
     const request = context.switchToHttp().getRequest<Request>();
     const accessToken = this.extractTokenFromHeader(request);
 
-    // const payload = await this.tokenService.verifyAccessToken(accessToken);
+    const payload = await this.tokenService.verifyToken(accessToken);
 
-    // request.user = await this.userService.findByIdWithCache(payload.id, [
-    //   "roles.permissions",
-    //   "permissions",
-    //   "agency",
-    // ]);
-
-    // request.payload = payload;
+    request.user = await this.userService.findByIdWithCache(payload.id, [
+      "role",
+      "role.permissions"
+    ]);
 
     return !!request.user;
   }

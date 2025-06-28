@@ -13,10 +13,25 @@ import {
 import { ValidationError } from "class-validator";
 import path from "path";
 import * as express from "express";
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector);
   const configService = app.get(ConfigService<AllConfigType>);
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+  options: {
+    urls: ['amqp://localhost:5672'],
+    queue: 'cats_queue',
+    queueOptions: {
+      durable: false
+    },
+  },
+  });
+
+  await app.startAllMicroservices();
 
   const corsOrigin = configService.getOrThrow("app.corsOrigin", {
     infer: true,

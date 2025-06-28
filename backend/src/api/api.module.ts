@@ -6,6 +6,8 @@ import { Module } from "@nestjs/common";
 import { ProductModule } from './product/product.module';
 import { TagModule } from './tag/tag.module';
 import { CustomerModule } from './customer/customer.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { CustomerModule } from './customer/customer.module';
     ProductModule,
     TagModule,
     CustomerModule,
+    PermissionsModule,
+    OrderModule,
   ],
 })
 export class ApiModule {}

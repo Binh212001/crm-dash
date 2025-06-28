@@ -10,9 +10,17 @@ import {
   Entity,
   Index,
   
+  JoinColumn,
+  
+  ManyToOne,
+  
+  OneToMany,
+  
   PrimaryColumn,
+  Relation,
 } from 'typeorm';
 import { v7 } from 'uuid';
+import { RoleEntity } from '../../permissions/entities/role.entity';
 
 @Entity('users')
 export class UserEntity extends AbstractEntity {
@@ -74,6 +82,11 @@ export class UserEntity extends AbstractEntity {
   socialId: string;
   @Column({ default: false })
   isInternal: boolean;
+  @OneToMany(() => RoleEntity, (role) => role.users ,{
+    eager: true
+})
+@JoinColumn()
+  role:Relation< RoleEntity>
 
 
   @DeleteDateColumn({

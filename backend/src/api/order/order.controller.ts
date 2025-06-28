@@ -1,0 +1,55 @@
+import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { ListOrderDto } from './dto/list-order.dto';
+import { OrderResponseDto } from './dto/order-response.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrderStatus, PaymentStatus } from './entities/order.entity';
+import { OrderService } from './order.service';
+
+@Controller('orders')
+export class OrderController {
+  constructor(private readonly orderService: OrderService) {}
+
+  @Post()
+  async create(@Body() data: CreateOrderDto): Promise<OrderResponseDto> {
+    return this.orderService.create(data);
+  }
+
+  @Get()
+  async findAll(@Query() dto: ListOrderDto): Promise<OffsetPaginatedDto<OrderResponseDto>> {
+    return this.orderService.findAll(dto);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<OrderResponseDto> {
+    return this.orderService.findOne(id);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() data: UpdateOrderDto): Promise<OrderResponseDto> {
+    return this.orderService.update(id, data);
+  }
+
+  @Put(':id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() data: { status: OrderStatus }
+  ): Promise<OrderResponseDto> {
+    return this.orderService.updateStatus(id, data.status);
+  }
+
+  @Put(':id/payment-status')
+  async updatePaymentStatus(
+    @Param('id') id: string,
+    @Body() data: { paymentStatus: PaymentStatus }
+  ): Promise<OrderResponseDto> {
+    return this.orderService.updatePaymentStatus(id, data.paymentStatus);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string): Promise<{ deleted: boolean }> {
+    await this.orderService.remove(id);
+    return { deleted: true };
+  }
+} 

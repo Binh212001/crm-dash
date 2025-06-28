@@ -1,19 +1,21 @@
+import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
+import { paginate } from '@/utils/offset-pagination';
 import { Inject, Injectable } from '@nestjs/common';
-import { UserRepository } from './user.repository';
-import { UserEntity } from './entities/user.entity';
+import { plainToInstance } from 'class-transformer';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ListUserDto } from './dto/list-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { plainToInstance } from 'class-transformer';
-import { paginate } from '@/utils/offset-pagination';
-import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
-import { ListUserDto } from './dto/list-user.dto';
+import { UserEntity } from './entities/user.entity';
+import { UserRepository } from './user.repository';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class UserService {
   constructor(
+    @Inject('EMAIL_SERVICE') 
+    private readonly client: ClientProxy,
     private readonly userRepository: UserRepository,
-
   ) {}
 
   async create(data: CreateUserDto): Promise<UserResponseDto> {
@@ -30,6 +32,14 @@ export class UserService {
     skipCount: false,
     takeAll: false,
   });
+  
+  // Send email notification asynchronously
+  try {
+    this.client.emit('send_email', base)
+  } catch (error) {
+    console.error('❌ Error sending email notification:', error);
+  }
+  
   return new OffsetPaginatedDto(plainToInstance(UserResponseDto, base), metaDto);
   }
 
@@ -38,6 +48,17 @@ export class UserService {
     
     if (!user) return null;
     return plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true });
+  }
+
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    return await this.userRepository.findOne({ where: { email } });
+  }
+
+  async findByIdWithCache(id: string, relations: string[] = []): Promise<UserEntity | null> {
+    return await this.userRepository.findOne({ 
+      where: { id },
+      relations: relations
+    });
   }
 
   async update(id: string, data: UpdateUserDto): Promise<UserResponseDto | null> {
