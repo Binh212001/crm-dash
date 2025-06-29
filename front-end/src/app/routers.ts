@@ -13,6 +13,7 @@ import Todo from "../pages/calendar/Todo";
 import Invoice from "../pages/business/Invoice";
 import OrderLists from "../pages/business/OrderLists";
 import Pricing from "../pages/business/Pricing";
+import AddProduct from "../pages/products/AddProduct";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: "invoice", Component: Invoice },
       { path: "order-lists", Component: OrderLists },
       { path: "pricing", Component: Pricing },
+      { path: "add-product", Component: AddProduct },
     ],
   },
   {
