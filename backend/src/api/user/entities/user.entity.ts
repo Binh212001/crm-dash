@@ -9,15 +9,10 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
-  
   JoinColumn,
-  
-  ManyToOne,
-  
-  OneToMany,
-  
+  OneToMany, 
   PrimaryColumn,
-  Relation,
+  Relation
 } from 'typeorm';
 import { v7 } from 'uuid';
 import { RoleEntity } from '../../permissions/entities/role.entity';

@@ -14,7 +14,6 @@ import { ValidationError } from "class-validator";
 import path from "path";
 import * as express from "express";
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector);
@@ -24,10 +23,14 @@ async function bootstrap() {
     transport: Transport.RMQ,
   options: {
     urls: ['amqp://localhost:5672'],
-    queue: 'cats_queue',
+    queue: 'send_mail',
     queueOptions: {
-      durable: false
+      durable: false 
     },
+    noAck: false,
+    exchange: 'send_email',
+    exchangeType: 'direct',
+    routingKey: 'info',
   },
   });
 

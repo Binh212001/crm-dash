@@ -35,7 +35,10 @@ export class UserService {
   
   // Send email notification asynchronously
   try {
-    this.client.emit('send_email', base)
+    this.client.emit(
+      { exchange: 'send_email', routingKey: 'info' },
+      { message: 'Log with info level' },
+    );
   } catch (error) {
     console.error('❌ Error sending email notification:', error);
   }

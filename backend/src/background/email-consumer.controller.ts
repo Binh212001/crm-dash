@@ -3,7 +3,7 @@ import { EventPattern, Payload, Ctx, RmqContext, MessagePattern } from '@nestjs/
 
 @Controller()
 export class EmailConsumerController {
-    @MessagePattern('send_email')
+  @EventPattern({ exchange: 'send_email', routingKey: 'info' })
     async handleSendEmail(@Payload() data: any, @Ctx() context: RmqContext) {
       console.log("🚀 ~ EmailConsumerController ~ handleSendEmail ~ data:", data);
       const channel = context.getChannelRef();
@@ -15,7 +15,7 @@ export class EmailConsumerController {
         
         // Simulate email processing
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        channel.ack(message);
         // Acknowledge the message after successful processing
         console.log('✅ Email processed successfully');
       } catch (err) {
