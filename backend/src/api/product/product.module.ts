@@ -18,6 +18,7 @@ import { CategoryController } from './category.controller';
 import { ProductVariantController } from './product-variant.controller';
 import { VariantAttributeController } from './variant-attribute.controller';
 import { TagModule } from '../tag/tag.module';
+import { ProductController } from './product.controller';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { TagModule } from '../tag/tag.module';
     CategoryController,
     ProductVariantController,
     VariantAttributeController,
+    ProductController
   ],
   exports: [
     ProductService,

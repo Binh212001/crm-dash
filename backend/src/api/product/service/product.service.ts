@@ -1,21 +1,22 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ProductRepository } from '../repository/product.repository';
-import { CreateProductDto } from '../dto/create-product.dto';
-import { UpdateProductDto } from '../dto/update-product.dto';
-import { VariantAttributeRepository } from '../repository/variant-attribute.repository';
-import { VariantValueRepository } from '../repository/variant-value.repository';
-import { ProductVariantRepository } from '../repository/product-variant.repository';
-import { ProductResponseDto } from '../dto/product-response';
-import { plainToInstance } from 'class-transformer';
+import { ListBaseReqDto } from '@/api/base/dto/list-base.req.dto';
 import { TagRepository } from '@/api/tag/tag.repository';
+import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
+import { paginate } from '@/utils/offset-pagination';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { In } from 'typeorm';
+import { CreateProductDto } from '../dto/create-product.dto';
+import { ProductResponseDto } from '../dto/product-response';
+import { UpdateProductDto } from '../dto/update-product.dto';
+import { ProductVariantRepository } from '../repository/product-variant.repository';
+import { ProductRepository } from '../repository/product.repository';
+import { VariantAttributeRepository } from '../repository/variant-attribute.repository';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly variantAttributeRepository: VariantAttributeRepository,
-    private readonly variantValueRepository: VariantValueRepository,
     private readonly productVariantRepository: ProductVariantRepository,
     private readonly tagRepository: TagRepository,
   ) {}
@@ -49,6 +50,7 @@ export class ProductService {
         const prVariant = this.productVariantRepository.create({
           attribute: variant,
           values: valueInput,
+          price: pv.price,
           product: prSave
         });
         prVariants.push(prVariant);
@@ -57,23 +59,34 @@ export class ProductService {
     }
     const res = await this.productRepository.findOne({
       where: { id: product.id },
-      relations: ['productVariant', 'productVariant.attribute', 'productVariant.values'],
-    });
+      relations: ['variants'],
+  });
 
     return plainToInstance(ProductResponseDto, res);
   }
 
-  async findAll() {
-    const products = await this.productRepository.find({
-      relations: ['productVariant', 'productVariant.attribute', 'productVariant.values'],
+  async findAll(dto: ListBaseReqDto) {
+    const query = this.productRepository.createQueryBuilder('product')
+      .leftJoinAndSelect('product.variants', 'variant')
+      .leftJoinAndSelect('variant.attribute', 'attribute')
+      .leftJoinAndSelect('variant.values', 'value')
+      .orderBy('product.id', 'DESC');
+
+    const [base, metaDto] = await paginate(query, dto, {
+      skipCount: false,
+      takeAll: false,
     });
-    return plainToInstance(ProductResponseDto, products);
+
+    return new OffsetPaginatedDto(
+      plainToInstance(ProductResponseDto, base, { excludeExtraneousValues: true }),
+      metaDto
+    );
   }
 
   async findOne(id: string) {
     const product = await this.productRepository.findOne({
       where: { id },
-      relations: ['productVariant', 'productVariant.attribute', 'productVariant.values'],
+      relations: ['variants', 'variants.attribute', 'variants.values'],
     });
     if (!product) {
       throw new NotFoundException('Product not found');
@@ -91,7 +104,7 @@ export class ProductService {
     // Optionally update variants here if needed
     const updated = await this.productRepository.findOne({
       where: { id },
-      relations: ['productVariant', 'productVariant.attribute', 'productVariant.values'],
+      relations: ['variants', 'variants.attribute', 'variants.values'],
     });
     return plainToInstance(ProductResponseDto, updated);
   }

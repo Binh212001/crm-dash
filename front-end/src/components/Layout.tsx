@@ -35,7 +35,7 @@ const mainNav: NavItem[] = [
 
 const pagesNav: NavItem[] = [
   { name: 'Inbox', href: '/inbox', icon: MdInbox },
-  { name: 'Team', href: '/team', icon: MdGroup },
+  { name: 'User', href: '/user', icon: MdGroup },
   { name: 'Calender', href: '/calender', icon: MdCalendarToday },
   { name: 'To-Do', href: '/todo', icon: MdCheckBox },
   { name: 'Invoice', href: '/invoice', icon: MdReceipt },

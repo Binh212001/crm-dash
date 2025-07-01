@@ -1,13 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { ProductVariantRepository } from '../repository/product-variant.repository';
-import { CreateProductVariantDto } from '../dto/create-product-variant.dto';
-import { UpdateProductVariantDto } from '../dto/update-product-variant.dto';
-import { ProductVariantResponseDto } from '../dto/product-variant-response.dto';
-import { plainToInstance } from 'class-transformer';
-import { ProductVariantEntity } from '../entities/product-variant.entity';
-import { paginate } from '@/utils/offset-pagination';
 import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
-import { VariantValueEntity } from '../entities/variant-value.entity';
+import { paginate } from '@/utils/offset-pagination';
+import { Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { CreateProductVariantDto } from '../dto/create-product-variant.dto';
+import { ProductVariantResponseDto } from '../dto/product-variant-response.dto';
+import { UpdateProductVariantDto } from '../dto/update-product-variant.dto';
+import { ProductVariantEntity } from '../entities/product-variant.entity';
+import { ProductVariantRepository } from '../repository/product-variant.repository';
 import { VariantValueRepository } from '../repository/variant-value.repository';
 
 @Injectable()
@@ -22,7 +21,7 @@ export class ProductVariantService {
     const variant = this.productVariantRepository.create(variantData);
     const savedVariant = await this.productVariantRepository.save(variant);
     if (values && values.length > 0) {
-      const valueEntities = values.map(value => this.variantValueRepository.create({ value, productVariantId: savedVariant.id }));
+      const valueEntities = values.map(value => this.variantValueRepository.create({ value, productVariant: savedVariant }));
       await this.variantValueRepository.save(valueEntities);
     }
     const result = await this.productVariantRepository.findOne({ where: { id: savedVariant.id }, relations: ['values'] });
@@ -58,8 +57,8 @@ export class ProductVariantService {
     const { values, ...updateData } = data;
     await this.productVariantRepository.update(id, updateData);
     if (values) {
-      await this.variantValueRepository.delete({ productVariantId: id });
-      const valueEntities = values.map(value => this.variantValueRepository.create({ value, productVariantId: id }));
+      await this.variantValueRepository.delete({ productVariant:{ id} });
+      const valueEntities = values.map(value => this.variantValueRepository.create({ value, productVariant: {id} }));
       await this.variantValueRepository.save(valueEntities);
     }
     const updatedVariant = await this.productVariantRepository.findOne({ where: { id }, relations: ['values'] });
@@ -71,7 +70,7 @@ export class ProductVariantService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.variantValueRepository.delete({ productVariantId: id });
+    
     await this.productVariantRepository.delete(id);
   }
 } 

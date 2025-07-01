@@ -1,75 +1,18 @@
-import React, { useState, useEffect } from 'react';
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  orders: number;
-  totalSpent: number;
-  city?: string;
-  lastSeen?: Date;
-  lastOrder?: Date;
-  avatar?: string;
-}
+import React from 'react';
+import { useGetCustomersQuery } from '../../service/customer.service';
 
 const CustomerList = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useGetCustomersQuery();
+  const customers = data?.data || [];
+  const pagination = data?.pagination || {
+    limit: 10,
+    currentPage: 1,
+    totalRecords: 0,
+    totalPages: 0,
+  };
+  console.log("🚀 ~ CustomerList ~ pagination:", pagination)
 
-  useEffect(() => {
-    // Mock data for demonstration
-    const mockCustomers: Customer[] = [
-      {
-        id: '1',
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        orders: 5,
-        totalSpent: 1250.00,
-        city: 'New York',
-        lastSeen: new Date('2024-01-15'),
-        lastOrder: new Date('2024-01-10'),
-        avatar: 'https://i.imgur.com/avatar1.jpg'
-      },
-      {
-        id: '2',
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
-        orders: 3,
-        totalSpent: 890.50,
-        city: 'Los Angeles',
-        lastSeen: new Date('2024-01-14'),
-        lastOrder: new Date('2024-01-08')
-      },
-      {
-        id: '3',
-        name: 'Mike Johnson',
-        email: 'mike.johnson@example.com',
-        orders: 8,
-        totalSpent: 2100.75,
-        city: 'Chicago',
-        lastSeen: new Date('2024-01-16'),
-        lastOrder: new Date('2024-01-12'),
-        avatar: 'https://i.imgur.com/avatar3.jpg'
-      },
-      {
-        id: '4',
-        name: 'Sarah Wilson',
-        email: 'sarah.wilson@example.com',
-        orders: 2,
-        totalSpent: 450.25,
-        lastSeen: new Date('2024-01-13'),
-        lastOrder: new Date('2024-01-05')
-      }
-    ];
-
-    // Simulate API call delay
-    setTimeout(() => {
-      setCustomers(mockCustomers);
-      setLoading(false);
-    }, 1000);
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -131,7 +74,7 @@ const CustomerList = () => {
                           />
                         ) : (
                           <span className="text-gray-500 text-sm font-medium">
-                            {customer.name.charAt(0)}
+                            {customer.name?.charAt(0)}
                           </span>
                         )}
                       </div>
@@ -140,10 +83,20 @@ const CustomerList = () => {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{customer.email}</td>
                   <td className="px-4 py-3 text-gray-700">{customer.orders}</td>
-                  <td className="px-4 py-3 font-semibold text-gray-900">${customer.totalSpent.toFixed(2)}</td>
+                  <td className="px-4 py-3 font-semibold text-gray-900">
+                    ${Number(customer.totalSpent).toFixed(2)}
+                  </td>
                   <td className="px-4 py-3 text-gray-600">{customer.city || '-'}</td>
-                  <td className="px-4 py-3 text-gray-600">{customer.lastSeen.toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-gray-600">{customer.lastOrder.toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {customer.lastSeen
+                      ? new Date(customer.lastSeen).toLocaleDateString()
+                      : '-'}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {customer.lastOrder
+                      ? new Date(customer.lastOrder).toLocaleDateString()
+                      : '-'}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex space-x-2">
                       <button
@@ -169,21 +122,7 @@ const CustomerList = () => {
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t border-gray-100 text-sm text-gray-600">
-          <span>Showing 1-{customers.length} of {customers.length}</span>
-          <div className="flex space-x-1">
-            <button className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white hover:bg-gray-100 transition" disabled>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white hover:bg-gray-100 transition">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

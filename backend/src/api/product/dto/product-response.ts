@@ -1,4 +1,6 @@
+import { TagResponseDto } from '@/api/tag/dto/tag-response.dto';
 import { Expose, Type } from 'class-transformer';
+import { VariantAttributeResponseDto } from './variant-attribute-response.dto';
 
 export class ProductVariantValueResponseDto {
   @Expose()
@@ -18,6 +20,9 @@ export class ProductVariantAttributeResponseDto {
   @Expose()
   @Type(() => ProductVariantValueResponseDto)
   values?: ProductVariantValueResponseDto[];
+  @Expose()
+  @Type(() => VariantAttributeResponseDto)
+  attribute?: VariantAttributeResponseDto[];
 }
 
 export class ProductResponseDto {
@@ -26,6 +31,8 @@ export class ProductResponseDto {
 
   @Expose()
   name: string;
+  @Expose()
+  sku: string;
 
   @Expose()
   description?: string;
@@ -40,9 +47,10 @@ export class ProductResponseDto {
   collection?: string;
 
   @Expose()
-  tags?: string[];
+  @Type(() => TagResponseDto)
+  tags?: TagResponseDto
 
   @Expose()
   @Type(() => ProductVariantAttributeResponseDto)
-  productVariant?: ProductVariantAttributeResponseDto[];
+  variants?: ProductVariantAttributeResponseDto[];
 }

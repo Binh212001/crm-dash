@@ -1,5 +1,5 @@
 import { AbstractEntity } from '@/database/entities/abstract.entity';
-import { Column, Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, ManyToOne, JoinColumn, Relation } from 'typeorm';
 import { v7 } from 'uuid';
 import { ProductVariantEntity } from './product-variant.entity';
 import { VariantAttributeEntity } from './variant-attribute.entity';
@@ -12,19 +12,15 @@ export class VariantValueEntity extends AbstractEntity {
   @Column()
   value: string;
 
-  @Column({ nullable: true })
-  productVariantId?: string;
+
 
   @ManyToOne(() => ProductVariantEntity, variant => variant.values, { nullable: true })
   @JoinColumn({ name: 'productVariantId' })
-  productVariant?: ProductVariantEntity;
-
-  @Column({ nullable: true })
-  attributeId?: string;
+  productVariant?: Relation<ProductVariantEntity>;
 
   @ManyToOne(() => VariantAttributeEntity, attribute => attribute.values, { nullable: true })
   @JoinColumn({ name: 'attributeId' })
-  attribute?: VariantAttributeEntity;
+  attribute?: Relation<VariantAttributeEntity>;
 
   constructor(data?: Partial<VariantValueEntity>) {
     super();

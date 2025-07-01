@@ -6,6 +6,9 @@ export class CreateProductDto {
   @StringField()
   name: string;
 
+  @StringField()
+  sku: string;
+
   @StringFieldOptional()
   description?: string;
 
@@ -22,5 +25,6 @@ export class CreateProductDto {
   tags?: string[];
 
   @ClassFieldOptional(() => CreateProductVariantDto, { each: true })
-  productVariant: CreateProductVariantDto[];
+  
+  productVariant?: CreateProductVariantDto[];
 }

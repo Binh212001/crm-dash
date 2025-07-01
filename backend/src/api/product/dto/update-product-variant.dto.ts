@@ -10,8 +10,6 @@ export class UpdateProductVariantDto {
   @StringFieldOptional()
   productId?: string;
 
-  @StringFieldOptional()
-  attributeId?: string;
 
   @StringFieldOptional({ each: true })
   values?: string[];

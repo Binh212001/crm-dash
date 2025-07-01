@@ -16,9 +16,6 @@ export class OrderItemEntity extends AbstractEntity {
   @JoinColumn({ name: 'orderId' })
   order: OrderEntity;
 
-  @Column({ nullable: true })
-  productVariantId?: string;
-
   @ManyToOne(() => ProductVariantEntity, { nullable: true })
   @JoinColumn({ name: 'productVariantId' })
   productVariant?: ProductVariantEntity;

@@ -6,7 +6,4 @@ export class VariantValueResponseDto {
 
   @Expose()
   value: string;
-
-  @Expose()
-  attributeId?: string;
 } 

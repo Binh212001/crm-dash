@@ -7,13 +7,13 @@ import OrderList from "../pages/orders/OrderList";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Inbox from "../pages/communication/Inbox";
-import Team from "../pages/communication/Team";
 import Calender from "../pages/calendar/Calender";
 import Todo from "../pages/calendar/Todo";
 import Invoice from "../pages/business/Invoice";
 import OrderLists from "../pages/business/OrderLists";
 import Pricing from "../pages/business/Pricing";
 import AddProduct from "../pages/products/AddProduct";
+import UserList from "../pages/communication/User";
 
 export const router = createBrowserRouter([
   {
@@ -25,7 +25,7 @@ export const router = createBrowserRouter([
       { path: "products", Component: ProductList },
       { path: "orders", Component: OrderList },
       { path: "inbox", Component: Inbox },
-      { path: "team", Component: Team },
+      { path: "user", Component: UserList },
       { path: "calender", Component: Calender },
       { path: "todo", Component: Todo },
       { path: "invoice", Component: Invoice },

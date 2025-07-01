@@ -175,15 +175,20 @@ POST http://localhost:8000/products
 Content-Type: application/json
 
 {
+  "sku": "SKU-001",
   "name": "Product A",
   "description": "Mô tả sản phẩm A",
-  "categoryId": "uuid-category",
   "vendor": "Vendor X",
   "collection": "Collection Y",
-  "tags": ["tag1", "tag2"],
-  "productVariant": []
+  "tags": ["0197c680-7fca-7368-8d62-295536b5e8ac"],
+  "productVariant": [
+    {
+      "price": 99.99,
+      "attributeId": "0197c678-9d90-736b-9502-9ceac1c9fbd1",
+      "values": ["0197c678-9db5-712b-b2ac-4af6609a3171"]
+    }
+  ]
 }
-
 ###
 GET http://localhost:8000/products
 

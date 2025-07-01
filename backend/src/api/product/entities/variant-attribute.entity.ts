@@ -1,7 +1,6 @@
 import { AbstractEntity } from '@/database/entities/abstract.entity';
-import { Column, Entity, PrimaryColumn, OneToMany } from 'typeorm';
+import { Column, Entity, PrimaryColumn, OneToMany, Relation } from 'typeorm';
 import { v7 } from 'uuid';
-import { ProductVariantEntity } from './product-variant.entity';
 import { VariantValueEntity } from './variant-value.entity';
 
 @Entity('variant_attributes')
@@ -15,7 +14,7 @@ export class VariantAttributeEntity extends AbstractEntity {
   @OneToMany(() => VariantValueEntity, value => value.attribute , {
     eager: true
   })
-  values?: VariantValueEntity[];
+  values?:  Relation<VariantValueEntity[]>;
 
   constructor(data?: Partial<VariantAttributeEntity>) {
     super();

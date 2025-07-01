@@ -13,8 +13,6 @@ export class ProductVariantResponseDto {
   @Expose()
   productId?: string;
 
-  @Expose()
-  attributeId?: string;
 
   @Expose()
   @Type(() => String)

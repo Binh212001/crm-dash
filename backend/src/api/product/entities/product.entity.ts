@@ -9,6 +9,9 @@ import { TagEntity } from '@/api/tag/entities/tag.entity';
 export class ProductEntity extends AbstractEntity {
   @PrimaryColumn('uuid')
   id: string = v7();
+@Column()
+  sku: string 
+
 
   @Column()
   name: string;
@@ -38,7 +41,7 @@ export class ProductEntity extends AbstractEntity {
   tags?: Relation< TagEntity>[];
 
   @OneToMany(() => ProductVariantEntity, variant => variant.product, { eager: true })
-  variants: ProductVariantEntity[];
+  variants: Relation<ProductVariantEntity[]>;
 
   constructor(data?: Partial<ProductEntity>) {
     super();
