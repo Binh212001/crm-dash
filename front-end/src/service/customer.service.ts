@@ -3,14 +3,20 @@ import type { Pagination } from '../types/pagination.type';
 
 export interface Customer {
   id: string;
+  firstName: string;
+  lastName: string;
   name: string;
   email: string;
+  phone?: string;
+  country?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  avatar?: string;
   orders: number;
   totalSpent: number;
-  city?: string;
   lastSeen?: string;
   lastOrder?: string;
-  avatar?: string;
 }
 
 export const customerApi = createApi({

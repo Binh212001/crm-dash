@@ -105,7 +105,7 @@ const Layout = () => {
         </div>
       </div>
       {/* Main content */}
-      <div className="md:pl-64 flex flex-col flex-1">
+      <div className="md:pl-64 flex flex-col flex-1 max-h-full overflow-scroll">
         <Header />
         <main className="flex-1">
           <Outlet />

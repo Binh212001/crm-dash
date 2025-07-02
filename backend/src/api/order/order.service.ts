@@ -99,7 +99,6 @@ export class OrderService extends BaseService<
       const orderItems = items.map(item => ({
         ...item,
         orderId: savedOrder.id,
-        totalPrice: item.unitPrice * item.quantity,
       }));
 
       await this.orderItemRepository.save(orderItems);
@@ -130,7 +129,6 @@ export class OrderService extends BaseService<
         const orderItems = items.map(item => ({
           ...item,
           orderId: id,
-          totalPrice: item.unitPrice * item.quantity,
         }));
 
         await this.orderItemRepository.save(orderItems);

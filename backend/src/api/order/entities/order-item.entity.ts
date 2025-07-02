@@ -3,6 +3,7 @@ import { Column, Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { v7 } from 'uuid';
 import { OrderEntity } from './order.entity';
 import { ProductVariantEntity } from '@/api/product/entities/product-variant.entity';
+import { ProductEntity } from '@/api/product/entities/product.entity';
 
 @Entity('order_items')
 export class OrderItemEntity extends AbstractEntity {
@@ -16,27 +17,16 @@ export class OrderItemEntity extends AbstractEntity {
   @JoinColumn({ name: 'orderId' })
   order: OrderEntity;
 
-  @ManyToOne(() => ProductVariantEntity, { nullable: true })
+  @ManyToOne(() => ProductVariantEntity, { eager: true })
   @JoinColumn({ name: 'productVariantId' })
   productVariant?: ProductVariantEntity;
 
-  @Column({ length: 200 })
-  productName: string;
-
-  @Column({ length: 100, nullable: true })
-  variantName?: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  unitPrice: number;
+  @ManyToOne(() => ProductEntity, { eager: true })
+  @JoinColumn()
+  product?: ProductEntity;
 
   @Column({ type: 'int' })
   quantity: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  totalPrice: number;
-
-  @Column({ nullable: true })
-  sku?: string;
 
   constructor(data?: Partial<OrderItemEntity>) {
     super();

@@ -9,8 +9,6 @@ export class UpdateProductVariantDto {
 
   @StringFieldOptional()
   productId?: string;
-
-
   @StringFieldOptional({ each: true })
   values?: string[];
 } 

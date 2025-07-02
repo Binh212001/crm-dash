@@ -1,7 +1,10 @@
 import React from "react";
 import OrderOverview from "./OrderOverview";
+import { useNavigate } from "react-router";
 
 const OrderLists = () => {
+
+  const navigate = useNavigate()
   const orders = [
     {
       id: "ORD-001",
@@ -191,7 +194,7 @@ const OrderLists = () => {
                 </div>
                 <button
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
-                  // onClick={} // Add handler for opening new customer modal/form
+                  onClick={()=> navigate('/add-order')}
                 >
                   New Order
                 </button>

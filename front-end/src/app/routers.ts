@@ -14,6 +14,8 @@ import Pricing from "../pages/business/Pricing";
 import AddProduct from "../pages/products/AddProduct";
 import UserList from "../pages/communication/User";
 import AddCustomer from "../pages/customers/AddCustomer";
+import AddOrder from "../pages/orders/AddOrder";
+import AddUser from "../pages/communication/AddUser";
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +34,8 @@ export const router = createBrowserRouter([
       { path: "pricing", Component: Pricing },
       { path: "add-product", Component: AddProduct },
       { path: "add-customer", Component: AddCustomer },
+      { path: "add-order", Component: AddOrder },
+      { path: "add-user", Component: AddUser },
     ],
   },
   {

@@ -1,32 +1,20 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import {
+  UUIDField,
+  UUIDFieldOptional,
+  NumberField,
+} from '@/decorators/field.decorators';
 import { CreateBaseReqDto } from '@/api/base/dto/create-base.req.dto';
 
 export class CreateOrderItemDto extends CreateBaseReqDto {
-  @IsOptional()
-  @IsUUID()
+  @UUIDField()
+  orderId: string;
+
+  @UUIDField()
   productVariantId?: string;
 
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(200)
-  productName: string;
+  @UUIDField()
+  productId?: string;
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  variantName?: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  unitPrice: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
+  @NumberField({ min: 1, int: true })
   quantity: number;
-
-  @IsOptional()
-  @IsString()
-  sku?: string;
-} 
+}

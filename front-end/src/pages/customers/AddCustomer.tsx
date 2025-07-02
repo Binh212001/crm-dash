@@ -40,7 +40,7 @@ const AddCustomer = () => {
         city: form.city || undefined,
         postalCode: form.postalCode || undefined,
         avatar: form.avatar || undefined,
-        tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : [],
+        // tags: form.tags ? form.tags.split(",").map((t) => t.trim()) : [],
       }).unwrap();
       navigate("/customers");
     } catch (err) {
@@ -197,7 +197,7 @@ const AddCustomer = () => {
             </button>
           </div>
         </form>
-        {/* Sidebar: Image Upload */}
+        {/* Sidebar: Image Upload & Tags */}
         <div className="w-full md:w-72 flex flex-col gap-4">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col items-center">
             <div className="w-28 h-28 rounded-lg bg-white border border-dashed border-gray-300 flex items-center justify-center mb-3">
@@ -250,7 +250,17 @@ const AddCustomer = () => {
               Upload Image
             </button>
           </div>
-          {/* Customer Tags sidebar removed */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 className="text-xs font-semibold mb-2">Customer Tags</h4>
+            <input
+              type="text"
+              name="tags"
+              value={form.tags}
+              onChange={handleChange}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
+              placeholder="Add tags (comma separated)..."
+            />
+          </div>
         </div>
       </div>
     </div>

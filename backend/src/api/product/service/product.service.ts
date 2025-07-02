@@ -68,8 +68,6 @@ export class ProductService {
   async findAll(dto: ListBaseReqDto) {
     const query = this.productRepository.createQueryBuilder('product')
       .leftJoinAndSelect('product.variants', 'variant')
-      .leftJoinAndSelect('variant.attribute', 'attribute')
-      .leftJoinAndSelect('variant.values', 'value')
       .orderBy('product.id', 'DESC');
 
     const [base, metaDto] = await paginate(query, dto, {

@@ -1,65 +1,52 @@
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  StringFieldOptional,
+  EnumFieldOptional,
+  NumberField,
+  NumberFieldOptional,
+  UUIDFieldOptional,
+  ClassField,
+} from '@/decorators/field.decorators';
 import { CreateBaseReqDto } from '@/api/base/dto/create-base.req.dto';
 import { CreateOrderItemDto } from './create-order-item.dto';
 import { OrderStatus, PaymentStatus } from '../entities/order.entity';
 
 export class CreateOrderDto extends CreateBaseReqDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
+  @StringFieldOptional({ maxLength: 50 })
   orderNumber?: string;
 
-  @IsOptional()
-  @IsEnum(OrderStatus)
+  @EnumFieldOptional(() => OrderStatus)
   status?: OrderStatus;
 
-  @IsOptional()
-  @IsEnum(PaymentStatus)
+  @EnumFieldOptional(() => PaymentStatus)
   paymentStatus?: PaymentStatus;
 
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
+  @NumberField({ min: 0 })
   subtotal: number;
 
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
+  @NumberFieldOptional({ min: 0 })
   tax?: number;
 
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
+  @NumberFieldOptional({ min: 0 })
   shipping?: number;
 
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
+  @NumberField({ min: 0 })
   total: number;
 
-  @IsOptional()
-  @IsUUID()
+  @UUIDFieldOptional()
   customerId?: string;
 
-  @IsOptional()
-  @IsUUID()
+  @UUIDFieldOptional()
   userId?: string;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional()
   notes?: string;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional()
   shippingAddress?: string;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional()
   billingAddress?: string;
 
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateOrderItemDto)
+  @ClassField(() => CreateOrderItemDto, { each: true })
   items: CreateOrderItemDto[];
-} 
+}

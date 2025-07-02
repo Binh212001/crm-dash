@@ -1,15 +1,13 @@
 import React from "react";
 import { useGetUsersQuery } from "../../service/user.service";
+import { useNavigate } from "react-router";
 
 const UserList = () => {
   const { data, isLoading } = useGetUsersQuery();
   const users = data?.data || [];
-  const pagination = data?.pagination || {
-    limit: 10,
-    currentPage: 1,
-    totalRecords: 0,
-    totalPages: 0,
-  };
+
+  const navigate  = useNavigate()
+ 
 
   if (isLoading) {
     return (
@@ -24,7 +22,10 @@ const UserList = () => {
       <div className="bg-white m-8 rounded-lg shadow border border-gray-200">
         <div className="px-6 pt-4 pb-2 flex items-center justify-between border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-800">User List</h2>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
+            onClick={() => navigate("/add-user")}
+          >
             New User
           </button>
         </div>

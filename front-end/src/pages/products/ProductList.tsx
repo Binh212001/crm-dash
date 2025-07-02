@@ -1,10 +1,11 @@
 import React from "react";
 import { useGetProductsQuery } from "../../service/product.service";
+import { useNavigate } from "react-router";
 
 const ProductList: React.FC = () => {
   const { data, isLoading, isError } = useGetProductsQuery();
-  console.log("🚀 ~ data:", data);
 
+   const navigate  = useNavigate()
   // For now, just show a loading or error state
   if (isLoading) {
     return (
@@ -47,7 +48,7 @@ const ProductList: React.FC = () => {
           />
           <button
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
-            // onClick={} // Add handler for opening new customer modal/form
+            onClick={()=> navigate('/add-product')} // Add handler for opening new customer modal/form
           >
             New Product
           </button>
