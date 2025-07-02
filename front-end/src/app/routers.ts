@@ -10,10 +10,10 @@ import Inbox from "../pages/communication/Inbox";
 import Calender from "../pages/calendar/Calender";
 import Todo from "../pages/calendar/Todo";
 import Invoice from "../pages/business/Invoice";
-import OrderLists from "../pages/business/OrderLists";
 import Pricing from "../pages/business/Pricing";
 import AddProduct from "../pages/products/AddProduct";
 import UserList from "../pages/communication/User";
+import AddCustomer from "../pages/customers/AddCustomer";
 
 export const router = createBrowserRouter([
   {
@@ -29,9 +29,9 @@ export const router = createBrowserRouter([
       { path: "calender", Component: Calender },
       { path: "todo", Component: Todo },
       { path: "invoice", Component: Invoice },
-      { path: "order-lists", Component: OrderLists },
       { path: "pricing", Component: Pricing },
       { path: "add-product", Component: AddProduct },
+      { path: "add-customer", Component: AddCustomer },
     ],
   },
   {

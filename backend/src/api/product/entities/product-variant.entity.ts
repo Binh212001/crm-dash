@@ -18,12 +18,13 @@ export class ProductVariantEntity extends AbstractEntity {
   product: Relation<ProductEntity>;
 
 
-  @OneToMany(() => VariantValueEntity, value => value.productVariant, { eager: true })
-  values?: Relation<VariantValueEntity[]>;
 
-  @ManyToOne(() => VariantAttributeEntity, { nullable: true, eager: true })
-  @JoinColumn({ name: 'attributeId' })
-  attribute?: Relation<VariantAttributeEntity>;
+  @Column({type: "jsonb"})
+  values?: VariantValueEntity[];
+
+  @Column({type: "jsonb"})
+
+  attribute?: VariantAttributeEntity
 
   constructor(data?: Partial<ProductVariantEntity>) {
     super();

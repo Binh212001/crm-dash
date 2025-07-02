@@ -10,13 +10,7 @@ export class VariantValueEntity extends AbstractEntity {
   id: string = v7();
 
   @Column()
-  value: string;
-
-
-
-  @ManyToOne(() => ProductVariantEntity, variant => variant.values, { nullable: true })
-  @JoinColumn({ name: 'productVariantId' })
-  productVariant?: Relation<ProductVariantEntity>;
+  name: string;
 
   @ManyToOne(() => VariantAttributeEntity, attribute => attribute.values, { nullable: true })
   @JoinColumn({ name: 'attributeId' })

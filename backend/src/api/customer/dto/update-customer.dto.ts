@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsNumber, IsDateString } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsNumber, IsDateString, IsArray } from 'class-validator';
 
 export class UpdateCustomerDto {
   @IsOptional()
@@ -10,16 +10,32 @@ export class UpdateCustomerDto {
   email?: string;
 
   @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @IsOptional()
   @IsNumber()
   orders?: number;
 
   @IsOptional()
   @IsNumber()
   totalSpent?: number;
-
-  @IsOptional()
-  @IsString()
-  city?: string;
 
   @IsOptional()
   @IsDateString()
@@ -32,4 +48,9 @@ export class UpdateCustomerDto {
   @IsOptional()
   @IsString()
   avatar?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 } 

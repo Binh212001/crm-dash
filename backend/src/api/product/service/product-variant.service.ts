@@ -21,13 +21,13 @@ export class ProductVariantService {
     const variant = this.productVariantRepository.create(variantData);
     const savedVariant = await this.productVariantRepository.save(variant);
     if (values && values.length > 0) {
-      const valueEntities = values.map(value => this.variantValueRepository.create({ value, productVariant: savedVariant }));
+      const valueEntities = values.map(value => this.variantValueRepository.create({ name: value, productVariant: savedVariant }));
       await this.variantValueRepository.save(valueEntities);
     }
     const result = await this.productVariantRepository.findOne({ where: { id: savedVariant.id }, relations: ['values'] });
     return plainToInstance(ProductVariantResponseDto, {
       ...result,
-      values: result?.values?.map(v => v.value) || [],
+      values: result?.values?.map(v => v.name) || [],
     }, { excludeExtraneousValues: true });
   }
 
@@ -39,7 +39,7 @@ export class ProductVariantService {
     });
     const data = base.map(variant => ({
       ...variant,
-      values: variant.values?.map(v => v.value) || [],
+      values: variant.values?.map(v => v.name) || [],
     }));
     return new OffsetPaginatedDto(plainToInstance(ProductVariantResponseDto, data), metaDto);
   }
@@ -49,7 +49,7 @@ export class ProductVariantService {
     if (!variant) return null;
     return plainToInstance(ProductVariantResponseDto, {
       ...variant,
-      values: variant.values?.map(v => v.value) || [],
+      values: variant.values?.map(v => v.name) || [],
     }, { excludeExtraneousValues: true });
   }
 
@@ -58,14 +58,14 @@ export class ProductVariantService {
     await this.productVariantRepository.update(id, updateData);
     if (values) {
       await this.variantValueRepository.delete({ productVariant:{ id} });
-      const valueEntities = values.map(value => this.variantValueRepository.create({ value, productVariant: {id} }));
+      const valueEntities = values.map(value => this.variantValueRepository.create({ name: value, productVariant: {id} }));
       await this.variantValueRepository.save(valueEntities);
     }
     const updatedVariant = await this.productVariantRepository.findOne({ where: { id }, relations: ['values'] });
     if (!updatedVariant) return null;
     return plainToInstance(ProductVariantResponseDto, {
       ...updatedVariant,
-      values: updatedVariant.values?.map(v => v.value) || [],
+      values: updatedVariant.values?.map(v => v.name) || [],
     }, { excludeExtraneousValues: true });
   }
 

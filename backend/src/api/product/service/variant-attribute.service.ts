@@ -22,7 +22,7 @@ export class VariantAttributeService {
     const attr = this.variantAttributeRepository.create(attrData);
     const savedAttr = await this.variantAttributeRepository.save(attr);
     if (values && values.length > 0) {
-      const valueEntities = values.map(value => this.variantValueRepository.create({ value }));
+      const valueEntities = values.map(value => this.variantValueRepository.create({ name: value }));
       // Set attribute after creation, before save
       valueEntities.forEach(entity => {
         entity.attribute = savedAttr;

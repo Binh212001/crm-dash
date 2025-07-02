@@ -2,7 +2,7 @@ import { StringFieldOptional } from '@/decorators/field.decorators';
 
 export class UpdateVariantValueDto {
   @StringFieldOptional()
-  value?: string;
+  name?: string;
 
   @StringFieldOptional()
   attributeId?: string;

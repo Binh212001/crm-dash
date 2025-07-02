@@ -5,5 +5,5 @@ export class VariantValueResponseDto {
   id: string;
 
   @Expose()
-  value: string;
+  name: string;
 } 

@@ -11,13 +11,25 @@ export class CustomerResponseDto {
   email: string;
 
   @Expose()
+  phone?: string;
+
+  @Expose()
+  country?: string;
+
+  @Expose()
+  address?: string;
+
+  @Expose()
+  city?: string;
+
+  @Expose()
+  postalCode?: string;
+
+  @Expose()
   orders: number;
 
   @Expose()
   totalSpent: number;
-
-  @Expose()
-  city?: string;
 
   @Expose()
   lastSeen?: Date;
@@ -27,4 +39,7 @@ export class CustomerResponseDto {
 
   @Expose()
   avatar?: string;
-} 
+
+  @Expose()
+  tags?: string[];
+}

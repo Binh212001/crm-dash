@@ -13,14 +13,26 @@ export class CustomerEntity extends AbstractEntity {
   @Column({ length: 100, unique: true })
   email: string;
 
+  @Column({ nullable: true, length: 30 })
+  phone?: string;
+
+  @Column({ nullable: true, length: 100 })
+  country?: string;
+
+  @Column({ nullable: true, length: 200 })
+  address?: string;
+
+  @Column({ nullable: true, length: 100 })
+  city?: string;
+
+  @Column({ nullable: true, length: 20 })
+  postalCode?: string;
+
   @Column({ default: 0 })
   orders: number;
 
   @Column({ type: 'decimal', default: 0 })
   totalSpent: number;
-
-  @Column({ nullable: true })
-  city?: string;
 
   @Column({ nullable: true })
   lastSeen?: Date;
@@ -30,6 +42,9 @@ export class CustomerEntity extends AbstractEntity {
 
   @Column({ nullable: true })
   avatar?: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  tags?: string[];
 
   constructor(data?: Partial<CustomerEntity>) {
     super();

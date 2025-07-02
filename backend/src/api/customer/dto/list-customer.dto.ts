@@ -7,6 +7,9 @@ export class ListCustomerDto extends PageOptionsDto {
 
   @StringFieldOptional()
   email?: string;
+  
+  @StringFieldOptional()
+  phone?: string;
 
   @StringFieldOptional()
   city?: string;

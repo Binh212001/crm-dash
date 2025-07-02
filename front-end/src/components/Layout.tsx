@@ -1,24 +1,19 @@
 import {
   MdAttachMoney,
-  MdBarChart,
-  MdCalendarToday, 
-  MdCheckBox, 
-  MdContactMail,
+  MdCalendarToday,
+  MdCheckBox,
   MdDashboard,
-  MdFavorite,
   MdGroup,
   MdInbox,
   MdInventory,
   MdList,
   MdLogout,
+  MdPeople,
   MdReceipt,
   MdSettings,
-  MdStorage,
-  MdTableChart,
-  MdPeople
-} from 'react-icons/md';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import Header from './Header';
+} from "react-icons/md";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import Header from "./Header";
 
 interface NavItem {
   name: string;
@@ -27,33 +22,42 @@ interface NavItem {
 }
 
 const mainNav: NavItem[] = [
-  { name: 'Dashboard', href: '/', icon: MdDashboard },
-  { name: 'Customers', href: '/customers', icon: MdPeople },
-  { name: 'Products', href: '/products', icon: MdInventory },
-  { name: 'Orders', href: '/orders', icon: MdList },
+  { name: "Dashboard", href: "/", icon: MdDashboard },
+  { name: "Customers", href: "/customers", icon: MdPeople },
+  { name: "Products", href: "/products", icon: MdInventory },
+  { name: "Orders", href: "/orders", icon: MdList },
 ];
 
 const pagesNav: NavItem[] = [
-  { name: 'Inbox', href: '/inbox', icon: MdInbox },
-  { name: 'User', href: '/user', icon: MdGroup },
-  { name: 'Calender', href: '/calender', icon: MdCalendarToday },
-  { name: 'To-Do', href: '/todo', icon: MdCheckBox },
-  { name: 'Invoice', href: '/invoice', icon: MdReceipt },
-  { name: 'Order Lists', href: '/order-lists', icon: MdList },
-  { name: 'Pricing', href: '/pricing', icon: MdAttachMoney },
+  { name: "Inbox", href: "/inbox", icon: MdInbox },
+  { name: "User", href: "/user", icon: MdGroup },
+  { name: "Calender", href: "/calender", icon: MdCalendarToday },
+  { name: "To-Do", href: "/todo", icon: MdCheckBox },
+  { name: "Invoice", href: "/invoice", icon: MdReceipt },
+  { name: "Pricing", href: "/pricing", icon: MdAttachMoney },
 ];
 
 const bottomNav: NavItem[] = [
-  { name: 'Settings', href: '/settings', icon: MdSettings },
-  { name: 'Logout', href: '/logout', icon: MdLogout },
+  { name: "Settings", href: "/settings", icon: MdSettings },
+  { name: "Logout", href: "/logout", icon: MdLogout },
 ];
 
-const SidebarSection = ({ title, items }: { title?: string, items: NavItem[] }) => {
+const SidebarSection = ({
+  title,
+  items,
+}: {
+  title?: string;
+  items: NavItem[];
+}) => {
   const location = useLocation();
-  
+
   return (
     <div className="mt-2">
-      {title && <div className="px-2 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">{title}</div>}
+      {title && (
+        <div className="px-2 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          {title}
+        </div>
+      )}
       <nav className="flex-1 px-2 space-y-1">
         {items.map((item) => {
           const isActive = location.pathname === item.href;
@@ -63,9 +67,17 @@ const SidebarSection = ({ title, items }: { title?: string, items: NavItem[] }) 
               key={item.name}
               to={item.href}
               className={`flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors
-                ${isActive ? 'bg-primary text-white' : 'text-gray-700 hover:bg-primary hover:text-white'}`}
+                ${
+                  isActive
+                    ? "bg-primary text-white"
+                    : "text-gray-700 hover:bg-primary hover:text-white"
+                }`}
             >
-              <IconComponent className={`mr-3 h-5 w-5 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+              <IconComponent
+                className={`mr-3 h-5 w-5 ${
+                  isActive ? "text-white" : "text-gray-400"
+                }`}
+              />
               {item.name}
             </Link>
           );
@@ -83,7 +95,7 @@ const Layout = () => {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex items-center flex-shrink-0 px-4 py-6">
             <h1 className="text-xl font-bold">
-              <span className='text-primary'>Dash</span>Stack
+              <span className="text-primary">Dash</span>Stack
             </h1>
           </div>
           <SidebarSection items={mainNav} />
@@ -94,7 +106,7 @@ const Layout = () => {
       </div>
       {/* Main content */}
       <div className="md:pl-64 flex flex-col flex-1">
-        <Header/>
+        <Header />
         <main className="flex-1">
           <Outlet />
         </main>
