@@ -9,5 +9,5 @@ export class ListUserDto extends PageOptionsDto {
   email?: string;
 
   @StringFieldOptional()
-  groupId?: string;
+  phone?: string;
 }

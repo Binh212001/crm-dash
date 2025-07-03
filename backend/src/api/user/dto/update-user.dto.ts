@@ -1,54 +1,39 @@
-import { IsString, IsEmail, IsOptional, IsDateString } from 'class-validator';
+import {
+  UserNameField,
+  StringFieldOptional,
+  EmailFieldOptional,
+  PasswordFieldOptional,
+  DateFieldOptional,
+} from '@/decorators/field.decorators';
 
 export class UpdateUserDto {
-  @IsOptional()
-  @IsString()
+  @UserNameField({ required: false })
   username?: string;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional({ minLength: 1, maxLength: 100 })
   firstName?: string;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional({ minLength: 1, maxLength: 100 })
   lastName?: string;
 
-  @IsOptional()
-  @IsEmail()
+  @EmailFieldOptional()
   email?: string;
 
-  @IsOptional()
-  @IsString()
+  @PasswordFieldOptional()
   password?: string;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional()
   phoneNumber?: string;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional()
   address?: string;
 
-  @IsOptional()
-  @IsDateString()
+  @DateFieldOptional()
   dateOfBirth?: Date;
 
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional()
   bio?: string;
 
-  @IsOptional()
-  image?: any;
-
-  @IsOptional()
-  @IsString()
-  referCode?: string;
-
-  @IsOptional()
-  @IsString()
-  provider?: string;
-
-  @IsOptional()
-  @IsString()
-  socialId?: string;
+  @StringFieldOptional()
+  avatar?: string;
 } 

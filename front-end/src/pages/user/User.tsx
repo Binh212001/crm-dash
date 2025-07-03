@@ -1,13 +1,32 @@
-import React from "react";
-import { useGetUsersQuery } from "../../service/user.service";
+import React, { useState } from "react";
+import { useGetUsersQuery } from "../../services/user.service";
 import { useNavigate } from "react-router";
+import { useDeleteUserMutation } from "../../services/user.service";
 
 const UserList = () => {
-  const { data, isLoading } = useGetUsersQuery();
+  const [search, setSearch] = useState("");
+  const { data, isLoading, refetch } = useGetUsersQuery(
+    search ? { q: search } : undefined
+  );
   const users = data?.data || [];
 
-  const navigate  = useNavigate()
- 
+  const navigate = useNavigate();
+
+  // Delete user by id using the mutation from user.service.ts
+  const [deleteUser] = useDeleteUserMutation();
+
+  const handleDeleteUser = async (id: string) => {
+    try {
+      await deleteUser(id).unwrap();
+      refetch();
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
+  const searchUser = (key: string) => {
+    setSearch(key);
+  };
 
   if (isLoading) {
     return (
@@ -20,14 +39,24 @@ const UserList = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-white m-8 rounded-lg shadow border border-gray-200">
-        <div className="px-6 pt-4 pb-2 flex items-center justify-between border-b border-gray-100">
+        <div className="px-6 pt-4 pb-2 flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-100 gap-4">
           <h2 className="text-lg font-semibold text-gray-800">User List</h2>
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
-            onClick={() => navigate("/add-user")}
-          >
-            New User
-          </button>
+          <div className="flex flex-col md:flex-row md:items-center gap-2">
+              <input
+                type="text"
+                className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
+                placeholder="Search by username, email, etc."
+                value={search}
+                onChange={(e) => searchUser(e.target.value)}
+              />
+             
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
+              onClick={() => navigate("/add-user")}
+            >
+              New User
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -76,6 +105,7 @@ const UserList = () => {
                         <button
                           className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
                           title="Edit"
+                          onClick={() => navigate('/update-user/'+user.id)}
                         >
                           <svg
                             className="w-4 h-4 text-blue-500"
@@ -94,6 +124,7 @@ const UserList = () => {
                         <button
                           className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-red-50 transition"
                           title="Delete"
+                          onClick={() => handleDeleteUser(user.id)}
                         >
                           <svg
                             className="w-4 h-4 text-red-500"

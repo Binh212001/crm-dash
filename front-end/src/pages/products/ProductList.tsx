@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetProductsQuery } from "../../service/product.service";
+import { useGetProductsQuery } from "../../services/product.service";
 import { useNavigate } from "react-router";
 
 const ProductList: React.FC = () => {

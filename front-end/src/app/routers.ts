@@ -7,15 +7,17 @@ import OrderList from "../pages/orders/OrderList";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Inbox from "../pages/communication/Inbox";
-import Calender from "../pages/calendar/Calender";
-import Todo from "../pages/calendar/Todo";
 import Invoice from "../pages/business/Invoice";
+import Todo from "../pages/calendar/Todo";
+import Calender from "../pages/calendar/Calender";
+import UserList from "../pages/user/User";
 import Pricing from "../pages/business/Pricing";
 import AddProduct from "../pages/products/AddProduct";
-import UserList from "../pages/communication/User";
 import AddCustomer from "../pages/customers/AddCustomer";
 import AddOrder from "../pages/orders/AddOrder";
-import AddUser from "../pages/communication/AddUser";
+import AddUser from "../pages/user/AddUser";
+import UpdateUser from "../pages/user/UpdateUser";
+
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +38,7 @@ export const router = createBrowserRouter([
       { path: "add-customer", Component: AddCustomer },
       { path: "add-order", Component: AddOrder },
       { path: "add-user", Component: AddUser },
+      { path: "update-user/:id", Component: UpdateUser },
     ],
   },
   {

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useCreateCustomerMutation } from "../../service/customer.service";
+import { useCreateCustomerMutation } from "../../services/customer.service";
 import { useNavigate } from "react-router-dom";
+import InputText from "../../components/InputText";
 
 const AddCustomer = () => {
   const [form, setForm] = useState({
@@ -63,50 +64,39 @@ const AddCustomer = () => {
           <div className="mb-6">
             <h3 className="font-semibold text-sm mb-2">Overview</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={form.firstName}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="First Name"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={form.lastName}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="Last Name"
-                />
-              </div>
+              <InputText
+                label="First Name"
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                required
+                placeholder="First Name"
+              />
+              <InputText
+                label="Last Name"
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+                required
+                placeholder="Last Name"
+              />
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                <input
+                <InputText
+                  label="Email"
                   type="email"
                   name="email"
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
                   placeholder="Email"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Phone number</label>
-                <input
-                  type="text"
+                <InputText
+                  label="Phone number"
                   name="phone"
                   value={form.phone}
                   onChange={handleChange}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
                   placeholder="Phone number"
                 />
               </div>
@@ -133,49 +123,37 @@ const AddCustomer = () => {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Address</label>
-                <input
-                  type="text"
+                <InputText
+                  label="Address"
                   name="address"
                   value={form.address}
                   onChange={handleChange}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
                   placeholder="Address"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={form.city}
-                  onChange={handleChange}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="City"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Postal Code</label>
-                <input
-                  type="text"
-                  name="postalCode"
-                  value={form.postalCode}
-                  onChange={handleChange}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="Postal Code"
-                />
-              </div>
+              <InputText
+                label="City"
+                name="city"
+                value={form.city}
+                onChange={handleChange}
+                placeholder="City"
+              />
+              <InputText
+                label="Postal Code"
+                name="postalCode"
+                value={form.postalCode}
+                onChange={handleChange}
+                placeholder="Postal Code"
+              />
             </div>
           </div>
           {/* Customer Tags */}
           <div className="mb-6">
             <h3 className="font-semibold text-sm mb-2">Customer Tags</h3>
-            <input
-              type="text"
+            <InputText
               name="tags"
               value={form.tags}
               onChange={handleChange}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
               placeholder="Add tags (comma separated)..."
             />
           </div>
@@ -232,19 +210,29 @@ const AddCustomer = () => {
               )}
             </div>
             <input
-              type="text"
-              name="avatar"
-              value={form.avatar}
-              onChange={handleChange}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200 mb-2"
-              placeholder="Avatar image URL"
+              type="file"
+              accept="image/*"
+              id="avatar-upload"
+              style={{ display: "none" }}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setForm((prev) => ({
+                      ...prev,
+                      avatar: reader.result as string,
+                    }));
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
             />
             <button
               type="button"
               className="w-full px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition text-xs font-medium"
               onClick={() => {
-                // Optionally, you could implement a file picker here
-                window.prompt("Paste an image URL here:", form.avatar);
+                document.getElementById("avatar-upload")?.click();
               }}
             >
               Upload Image
@@ -252,12 +240,10 @@ const AddCustomer = () => {
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h4 className="text-xs font-semibold mb-2">Customer Tags</h4>
-            <input
-              type="text"
+            <InputText
               name="tags"
               value={form.tags}
               onChange={handleChange}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-200"
               placeholder="Add tags (comma separated)..."
             />
           </div>

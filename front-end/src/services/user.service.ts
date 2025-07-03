@@ -11,19 +11,35 @@ export interface User {
   address?: string;
   dateOfBirth?: string;
   bio?: string;
-  image?: string;
+  avatar?: string;
   createdAt?: string;
   createdBy?: string | null;
   updatedAt?: string;
   updatedBy?: string | null;
 }
 
+export interface UserParam {
+  q? :string;
+  page?: number;
+  limit?: number;
+}
+
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
   endpoints: (builder) => ({
-    getUsers: builder.query<{ data: User[]; pagination: Pagination }, void>({
-      query: () => 'user',
+    getUsers: builder.query<{ data: User[]; pagination: Pagination }, UserParam | void>({
+      query: (params) => {
+        if (params) {
+          const searchParams = new URLSearchParams();
+          if (params.page !== undefined) searchParams.append('page', String(params.page));
+          if (params.limit !== undefined) searchParams.append('limit', String(params.limit));
+          if (params.q !== undefined) searchParams.append('q', String(params.q));
+          const queryString = searchParams.toString();
+          return queryString ? `user?${queryString}` : 'user';
+        }
+        return 'user';
+      },
     }),
     getUser: builder.query<User, string>({
       query: (id) => `user/${id}`,

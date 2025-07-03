@@ -10,6 +10,7 @@ import {
   Entity,
   Index,
   JoinColumn,
+  ManyToOne,
   OneToMany, 
   PrimaryColumn,
   Relation
@@ -53,12 +54,12 @@ export class UserEntity extends AbstractEntity {
   @Column({ nullable: true })
   dateOfBirth?: Date;
 
-  @Column()
+  @Column({nullable: true})
   password!: string;
   @Column({ default: '' })
   bio?: string;
-  @Column({ type: 'jsonb', default: { url: '' } })
-  image?: FileResDto;
+  @Column({nullable: true })
+  avatar?: string;
   @Column({ default: 0 })
   numberOfCourse: number;
   @Column({
@@ -68,20 +69,12 @@ export class UserEntity extends AbstractEntity {
   })
   isSuperUser: boolean;
 
-  @Column({ default: '', nullable: true })
-  referCode: string;
-  @Column({ default: '', nullable: true })
-  provider: string;
-
-  @Column({ default: '', nullable: true })
-  socialId: string;
-  @Column({ default: false })
-  isInternal: boolean;
-  @OneToMany(() => RoleEntity, (role) => role.users ,{
-    eager: true
-})
-@JoinColumn()
-  role:Relation< RoleEntity>
+  @ManyToOne(() => RoleEntity, (role) => role.users, {
+    eager: true,
+    nullable: true,
+  })
+  @JoinColumn()
+  role: Relation<RoleEntity>;
 
 
   @DeleteDateColumn({

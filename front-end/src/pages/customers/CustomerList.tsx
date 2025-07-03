@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import {
   useDeleteCustomerMutation,
   useGetCustomersQuery,
-} from "../../service/customer.service";
+} from "../../services/customer.service";
 
 const CustomerList = () => {
   const { data, isLoading , refetch } = useGetCustomersQuery();

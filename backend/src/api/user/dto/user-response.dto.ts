@@ -30,19 +30,8 @@ export class UserResponseDto {
   bio?: string;
 
   @Expose()
-  image?: any;
+  avatar?: any;
 
-  @Expose()
-  numberOfCourse: number;
-
-  @Expose()
-  referCode?: string;
-
-  @Expose()
-  provider?: string;
-
-  @Expose()
-  socialId?: string;
   @Type(()=>RoleResponseDto)
   role : RoleResponseDto
 } 

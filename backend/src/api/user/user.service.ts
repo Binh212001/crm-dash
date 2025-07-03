@@ -25,9 +25,16 @@ export class UserService {
   }
 
   async findAll( reqDto: ListUserDto): Promise<OffsetPaginatedDto<UserResponseDto>> {
+    const{q} = reqDto
     const query = this.userRepository
     .createQueryBuilder('user')
     .orderBy('user.id', 'DESC');
+    if(q){
+    query.andWhere(
+      '(user.username ILIKE :q OR user.email ILIKE :q OR user.phoneNumber ILIKE :q)',
+      { q: `%${q}%` }
+    );
+    }
   const [base, metaDto] = await paginate<UserEntity>(query, reqDto, {
     skipCount: false,
     takeAll: false,
