@@ -84,7 +84,7 @@ export class ProductService {
   async findOne(id: string) {
     const product = await this.productRepository.findOne({
       where: { id },
-      relations: ['variants', 'variants.attribute', 'variants.values'],
+      relations: ['variants'],
     });
     if (!product) {
       throw new NotFoundException('Product not found');

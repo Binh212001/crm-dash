@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useProductRelations } from '../../hooks/UseProductRelations';
 import type { Category } from '../../services/category.service';
 import type { VariantAttribute, VariantValue } from '../../services/variant.service';
-import { useCreateProductMutation, type CreateProductDto } from '../../services/product.service';
+import {
+  useGetProductQuery,
+  useUpdateProductMutation,
+  type CreateProductDto,
+} from '../../services/product.service';
 import InputText from '../../components/InputText';
 
-const AddProduct: React.FC = () => {
+const UpdateProduct: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  // const navigate = useNavigate();
   const { categories, variantAttributes } = useProductRelations();
-  const [createProduct, { isLoading, isSuccess, isError, error }] = useCreateProductMutation();
+  const { data: product, isLoading, isError } = useGetProductQuery(id || '');
+  const [updateProduct, { isLoading: isUpdating, isSuccess, isError: isUpdateError, error }] =
+    useUpdateProductMutation();
 
   // Form state
   const [sku, setSku] = useState('');
@@ -20,6 +29,7 @@ const AddProduct: React.FC = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [selectedAttributeId, setSelectedAttributeId] = useState<string>('');
   const [selectedVariantValueId, setSelectedVariantValueId] = useState<string>('');
+  const [price, setPrice] = useState<number>(0);
 
   // For demo, static vendor/collection lists
   const vendors = [
@@ -33,10 +43,31 @@ const AddProduct: React.FC = () => {
     { id: 'collection3', name: 'Collection 3' },
   ];
 
-  
-    const selectedAttribute = variantAttributes.find(
-      (attr: VariantAttribute) => attr.id === selectedAttributeId
-    );
+  // Populate form with product data
+  useEffect(() => {
+    if (product) {
+      setSku(product.sku || '');
+      setTitle(product.name || '');
+      setDescription(product.description || '');
+      setCategoryId(product.categoryId || '');
+      setVendor(product.vendor || '');
+      setCollection(product.collection || '');
+      setTags(product.tags ? product.tags.map(tag => tag.id) : []);
+      // If productVariant exists, prefill attribute/value/price
+      if (product.productVariant && product.productVariant.length > 0) {
+        const variant = product.productVariant[0];
+        setSelectedAttributeId(variant.attribute?.id || '');
+        setSelectedVariantValueId(
+          variant.values && variant.values.length > 0 ? variant.values[0].id : ''
+        );
+        setPrice(variant.price || 0);
+      }
+    }
+  }, [product]);
+
+  const selectedAttribute = variantAttributes.find(
+    (attr: VariantAttribute) => attr.id === selectedAttributeId
+  );
 
   // Handle tag input (add on Enter or comma)
   const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -56,43 +87,53 @@ const AddProduct: React.FC = () => {
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!id) return;
 
     // Compose product object
-    const product:CreateProductDto = {
-      sku: sku,
+    const updateData: Partial<CreateProductDto> = {
+      sku,
       name: title,
       description,
-      categoryId: categoryId,
+      categoryId,
       vendor,
       collection,
       tags,
-      productVariant: selectedAttributeId && selectedVariantValueId && selectedAttribute
-        ? [
-            {
-              attributeId: selectedAttribute.id,
-              values: [selectedVariantValueId],
-              price: 0, // You may want to add a price input in the form and use its value here
-            },
-          ]
-        : [],
+      productVariant:
+        selectedAttributeId && selectedVariantValueId && selectedAttribute
+          ? [
+              {
+                attributeId: selectedAttribute.id,
+                values: [selectedVariantValueId],
+                price: price,
+              },
+            ]
+          : [],
     };
     try {
-      await createProduct(product).unwrap();
-      // Optionally reset form or redirect
-      setSku('');
-      setTitle('');
-      setDescription('');
-      setCategoryId('');
-      setVendor('');
-      setCollection('');
-      setTags([]);
-      setSelectedAttributeId('');
-      setSelectedVariantValueId('');
+      await updateProduct({ id, data: updateData }).unwrap();
+      // Optionally redirect or show success
+      // navigate('/products');
     } catch (err) {
       console.log("🚀 ~ handleSubmit ~ err:", err)
       // error handled by RTK Query
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <span className="text-gray-500">Loading product...</span>
+      </div>
+    );
+  }
+
+  if (isError || !product) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <span className="text-red-500">Failed to load product.</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6">
@@ -102,13 +143,13 @@ const AddProduct: React.FC = () => {
           <div className="flex-1 flex flex-col gap-6">
             {/* Header */}
             <div>
-              <h2 className="text-base font-semibold mb-2">Create product</h2>
+              <h2 className="text-base font-semibold mb-2">Update product</h2>
               {isSuccess && (
-                <div className="text-green-600 text-sm mb-2">Product created successfully!</div>
+                <div className="text-green-600 text-sm mb-2">Product updated successfully!</div>
               )}
-              {isError && (
+              {isUpdateError && (
                 <div className="text-red-600 text-sm mb-2">
-                  Failed to create product{error && (typeof error === 'string' ? `: ${error}` : '')}
+                  Failed to update product{error && (typeof error === 'string' ? `: ${error}` : '')}
                 </div>
               )}
             </div>
@@ -239,6 +280,15 @@ const AddProduct: React.FC = () => {
                       </select>
                     </div>
                   </div>
+                  <div className="mt-2">
+                    <InputText
+                      label="Variant Price"
+                      type="number"
+                      placeholder="Price"
+                      value={price}
+                      onChange={e => setPrice(Number(e.target.value))}
+                    />
+                  </div>
                   <p className="text-xs text-gray-400 mt-1">
                     Select a variant attribute and its value (e.g. Size: Medium, Color: Red)
                   </p>
@@ -249,27 +299,14 @@ const AddProduct: React.FC = () => {
               <button
                 type="submit"
                 className="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700 transition"
-                disabled={isLoading}
+                disabled={isUpdating}
               >
-                {isLoading ? 'Creating...' : 'Create Product'}
+                {isUpdating ? 'Updating...' : 'Update Product'}
               </button>
             </div>
           </div>
           {/* Sidebar */}
           <div className="w-full lg:w-[320px] flex flex-col gap-6">
-            {/* Image Upload */}
-            <div className="bg-white rounded-lg p-6 shadow flex flex-col items-center">
-              <h3 className="font-semibold text-sm mb-4 w-full">Image</h3>
-              <div className="w-full flex flex-col items-center">
-                <div className="w-32 h-32  border border-dashed border-gray-200 rounded flex items-center justify-center mb-4">
-                  <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-400">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12l2 2 4-4" />
-                  </svg>
-                </div>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium" type="button">Upload Image</button>
-              </div>
-            </div>
             {/* Product Tags */}
             <div className="bg-white rounded-lg p-6 shadow">
               <h3 className="font-semibold text-sm mb-4">Product Tags</h3>
@@ -284,15 +321,16 @@ const AddProduct: React.FC = () => {
                       type="button"
                       className="ml-1 text-blue-500 hover:text-blue-700"
                       onClick={() => handleRemoveTag(tag)}
-                      aria-label={`Remove tag ${tag}`}
                     >
                       &times;
                     </button>
                   </span>
                 ))}
               </div>
-              <InputText
-                placeholder="Add tags for product..."
+              <input
+                type="text"
+                className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none"
+                placeholder="Add tag and press Enter"
                 value={tagInput}
                 onChange={e => setTagInput(e.target.value)}
                 onKeyDown={handleTagInputKeyDown}
@@ -305,4 +343,4 @@ const AddProduct: React.FC = () => {
   );
 };
 
-export default AddProduct;
+export default UpdateProduct;

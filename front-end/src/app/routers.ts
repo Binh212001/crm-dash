@@ -17,6 +17,8 @@ import AddCustomer from "../pages/customers/AddCustomer";
 import AddOrder from "../pages/orders/AddOrder";
 import AddUser from "../pages/user/AddUser";
 import UpdateUser from "../pages/user/UpdateUser";
+import UpdateCustomer from "../pages/customers/UpdateCustomer";
+import UpdateProduct from "../pages/products/UpdateProduct";
 
 
 export const router = createBrowserRouter([
@@ -39,6 +41,8 @@ export const router = createBrowserRouter([
       { path: "add-order", Component: AddOrder },
       { path: "add-user", Component: AddUser },
       { path: "update-user/:id", Component: UpdateUser },
+      { path: "update-customer/:id", Component: UpdateCustomer },
+      { path: "update-product/:id", Component: UpdateProduct },
     ],
   },
   {

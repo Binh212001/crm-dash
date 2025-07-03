@@ -128,6 +128,7 @@ const CustomerList = () => {
                       <button
                         className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
                         title="Edit"
+                        onClick={()=>navigate('/update-customer'+customer.id)} 
                       >
                         <svg
                           className="w-4 h-4 text-blue-500"

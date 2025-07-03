@@ -1,9 +1,16 @@
-import React, { useState } from "react";
-import { useCreateCustomerMutation, useGetCustomersQuery } from "../../services/customer.service";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useUpdateCustomerMutation, useGetCustomerQuery, useGetCustomersQuery } from "../../services/customer.service";
+import { useNavigate, useParams } from "react-router-dom";
 import InputText from "../../components/InputText";
 
-const AddCustomer = () => {
+const UpdateCustomer = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  // Fetch the customer data for the given id
+  const { data: customer, isLoading: isCustomerLoading } = useGetCustomerQuery(id || "");
+  const { refetch } = useGetCustomersQuery();
+
   const [form, setForm] = useState({
     name: "",
     firstName: "",
@@ -16,11 +23,27 @@ const AddCustomer = () => {
     postalCode: "",
     avatar: "",
   });
-  const [error, setError] = useState<string | null>(null);
-  const [createCustomer, { isLoading }] = useCreateCustomerMutation();
-  const { refetch } = useGetCustomersQuery();
 
-  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [updateCustomer, { isLoading }] = useUpdateCustomerMutation();
+
+  // Populate form with customer data when loaded
+  useEffect(() => {
+    if (customer) {
+      setForm({
+        name: customer.name || "",
+        firstName: customer.firstName || "",
+        lastName: customer.lastName || "",
+        email: customer.email || "",
+        phone: customer.phone || "",
+        address: customer.address || "",
+        country: customer.country || "",
+        city: customer.city || "",
+        postalCode: customer.postalCode || "",
+        avatar: customer.avatar || "",
+      });
+    }
+  }, [customer]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -49,33 +72,48 @@ const AddCustomer = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!id) {
+      setError("Customer ID is missing.");
+      return;
+    }
     try {
-      await createCustomer({
-        name: form.name,
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        phone: form.phone || undefined,
-        address: form.address || undefined,
-        country: form.country || undefined,
-        city: form.city || undefined,
-        postalCode: form.postalCode || undefined,
-        avatar: form.avatar || undefined,
+      await updateCustomer({
+        id,
+        data: {
+          name: form.name,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone || undefined,
+          address: form.address || undefined,
+          country: form.country || undefined,
+          city: form.city || undefined,
+          postalCode: form.postalCode || undefined,
+          avatar: form.avatar || undefined,
+        },
       }).unwrap();
       refetch();
       navigate("/customers");
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setError((err as any)?.data?.message || "Failed to add customer");
+      setError((err as any)?.data?.message || "Failed to update customer");
     }
   };
+
+  if (isCustomerLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-lg">Loading customer...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="w-full mx-9 bg-white border border-gray-300 rounded-lg shadow p-6 flex flex-col md:flex-row gap-6">
         {/* Main Form */}
         <form onSubmit={handleSubmit} className="flex-1">
-          <h2 className="text-lg font-semibold mb-4">Create Customer</h2>
+          <h2 className="text-lg font-semibold mb-4">Update Customer</h2>
           {error && (
             <div className="mb-2 text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 text-xs">
               {error}
@@ -155,7 +193,7 @@ const AddCustomer = () => {
               className="px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs font-medium disabled:opacity-60"
               disabled={isLoading}
             >
-              {isLoading ? "Creating..." : "Create Customer"}
+              {isLoading ? "Updating..." : "Update Customer"}
             </button>
             <button
               type="button"
@@ -223,4 +261,4 @@ const AddCustomer = () => {
   );
 };
 
-export default AddCustomer;
+export default UpdateCustomer; 

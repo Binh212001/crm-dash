@@ -4,6 +4,8 @@ import { useNavigate } from "react-router";
 
 const ProductList: React.FC = () => {
   const { data, isLoading, isError } = useGetProductsQuery();
+  // Import and use the useProductRelations hook to get categories and variant attributes
+  // (Assumes you have: import { useProductRelations } from "../../hooks/UseProductRelations"; at the top)
 
    const navigate  = useNavigate()
   // For now, just show a loading or error state
@@ -99,6 +101,7 @@ const ProductList: React.FC = () => {
                       <button
                         className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
                         title="Edit"
+                        onClick={() => navigate(`/update-product/${product.id}`)}
                       >
                         <svg
                           className="w-4 h-4 text-blue-500"

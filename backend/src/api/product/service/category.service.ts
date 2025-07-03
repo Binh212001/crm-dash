@@ -22,10 +22,6 @@ export class CategoryService {
 
   async findAll(reqDto: any): Promise<OffsetPaginatedDto<CategoryResponseDto>> {
     const query = this.categoryRepository.createQueryBuilder('category')
-      .leftJoinAndSelect('category.products', 'products')
-      .leftJoinAndSelect('products.variants', 'variants')
-      .leftJoinAndSelect('variants.values', 'values')
-      .leftJoinAndSelect('variants.attribute', 'attribute')
       .orderBy('category.id', 'DESC');
     const [base, metaDto] = await paginate<CategoryEntity>(query, reqDto, {
       skipCount: false,
