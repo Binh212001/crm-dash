@@ -1,36 +1,30 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { Pagination } from '../types/pagination.type';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { Pagination } from "../types/pagination.type";
 
-// ProductResponseDto from backend/src/api/order/dto/order-response.dto.ts
+// ProductResponseDto matches backend/src/api/product/dto/product-response.ts
 export interface ProductResponseDto {
   id: string;
   name: string;
+  sku: string;
+  description?: string;
+  category?: Category;
+  vendor?: string;
+  collection?: string;
+  tags?: Tag[];
+  price?: number;
+  stock?: number; // Added stock
 }
 
-// Tag interface (not in ProductResponseDto, but used in Product)
+// Tag interface (used in ProductResponseDto)
 export interface Tag {
   id: string;
   name: string;
   description?: string;
 }
-
-// VariantValue and VariantAttribute interfaces
-export interface VariantValue {
+export interface Category {
   id: string;
   name: string;
-}
-
-export interface VariantAttribute {
-  id: string;
-  name: string;
-  values?: VariantValue[];
-}
-
-// CreateProductVariantDto matches backend/src/api/product/dto/create-product-variant.dto.ts
-export interface CreateProductVariantDto {
-  price: number;
-  attributeId?: string;
-  values?: string[];
+  description?: string;
 }
 
 // CreateProductDto matches backend/src/api/product/dto/create-product.dto.ts
@@ -41,63 +35,64 @@ export interface CreateProductDto {
   categoryId?: string;
   vendor?: string;
   collection?: string;
+  price?: number;
   tags?: string[]; // Tag IDs
-  productVariant?: CreateProductVariantDto[];
+  stock?: number; // Added stock
+  // productVariant?: CreateProductVariantDto[]; // Not in create-product.dto.ts, comment out for now
 }
 
-// ProductVariant for frontend (not for create, but for display)
-export interface ProductVariant {
-  id?: string;
-  price: number;
-  attribute?: VariantAttribute;
-  values?: VariantValue[];
-}
-
-// Product interface for frontend (extends ProductResponseDto, includes more fields)
-export interface Product extends ProductResponseDto {
-  sku: string;
+// UpdateProductDto matches backend/src/api/product/dto/update-product.dto.ts
+export interface UpdateProductDto {
+  name?: string;
   description?: string;
-  categoryId?: string | null;
+  categoryId?: string;
   vendor?: string;
   collection?: string;
-  tags?: Tag[];
-  productVariant?: ProductVariant[];
+  tags?: string[];
+  stock?: number; // Added stock
+  price?: number;
 }
 
 export const productApi = createApi({
-  reducerPath: 'productApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+  reducerPath: "productApi",
+  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/" }),
   endpoints: (builder) => ({
-    getProducts: builder.query<{ data: Product[]; pagination: Pagination }, void>({
+    getProducts: builder.query<
+      { data: ProductResponseDto[]; pagination: Pagination },
+      void
+    >({
       query: () => ({
-        url: 'products',
-        method: 'GET',
+        url: "products",
+        method: "GET",
       }),
     }),
-    getProduct: builder.query<Product, string>({
+    getProduct: builder.query<ProductResponseDto, string>({
       query: (id) => ({
         url: `products/${id}`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
-    createProduct: builder.mutation<Product, CreateProductDto>({
+    createProduct: builder.mutation<ProductResponseDto, CreateProductDto>({
       query: (body) => ({
-        url: 'products',
-        method: 'POST',
+        url: "products",
+        method: "POST",
         body,
       }),
     }),
-    updateProduct: builder.mutation<Product, { id: string; data: Partial<CreateProductDto> }>({
+    updateProduct: builder.mutation<
+      ProductResponseDto,
+      { id: string; data: UpdateProductDto }
+    >({
       query: ({ id, data }) => ({
         url: `products/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
     }),
     deleteProduct: builder.mutation<{ message: string; id: string }, string>({
       query: (id) => ({
         url: `products/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
     }),
   }),

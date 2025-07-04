@@ -3,7 +3,7 @@ import { userApi } from '../services/user.service';
 import { customerApi } from '../services/customer.service';
 import { productApi } from '../services/product.service';
 import { categoryApi } from '../services/category.service';
-import { variantAttributeApi } from '../services/variant.service';
+import { tagApi } from '../services/tag.service';
 
 export const store = configureStore({
   reducer: {
@@ -11,7 +11,7 @@ export const store = configureStore({
     [customerApi.reducerPath]: customerApi.reducer,
     [productApi.reducerPath]: productApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
-    [variantAttributeApi.reducerPath]: variantAttributeApi.reducer,
+    [tagApi.reducerPath]: tagApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -19,7 +19,7 @@ export const store = configureStore({
       customerApi.middleware,
       productApi.middleware,
       categoryApi.middleware,
-      variantAttributeApi.middleware
+      tagApi.middleware
     ),
 });
 

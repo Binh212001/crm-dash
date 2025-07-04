@@ -5,9 +5,9 @@ import {
 } from "../../services/customer.service";
 
 const CustomerList = () => {
-  const { data, isLoading , refetch } = useGetCustomersQuery();
+  const { data, isLoading, refetch } = useGetCustomersQuery();
   const [deleteCustomerMutation] = useDeleteCustomerMutation();
-  const  navigate = useNavigate()
+  const navigate = useNavigate();
 
   const customers = data?.data || [];
   const pagination = data?.pagination || {
@@ -27,9 +27,9 @@ const CustomerList = () => {
 
   const deleteCustomer = async (id: string) => {
     try {
-      console.log("🚀 ~ deleteCustomer ~ id:", id)
+      console.log("🚀 ~ deleteCustomer ~ id:", id);
       await deleteCustomerMutation(id).unwrap();
-      refetch()
+      refetch();
     } catch (error) {
       // Optionally, handle error (e.g., show error message)
       console.error("Failed to delete customer:", error);
@@ -59,7 +59,7 @@ const CustomerList = () => {
             />
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
-              onClick={()=>navigate('/add-customer')} 
+              onClick={() => navigate("/add-customer")}
             >
               New Customer
             </button>
@@ -128,7 +128,9 @@ const CustomerList = () => {
                       <button
                         className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
                         title="Edit"
-                        onClick={()=>navigate('/update-customer'+customer.id)} 
+                        onClick={() =>
+                          navigate("/update-customer" + customer.id)
+                        }
                       >
                         <svg
                           className="w-4 h-4 text-blue-500"

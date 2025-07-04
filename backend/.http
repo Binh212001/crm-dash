@@ -66,7 +66,7 @@ POST http://localhost:8000/tag
 Content-Type: application/json
 
 {
-  "name": "VIP",
+  "name": "",
   "description": "VIP customer"
 }
 
@@ -177,10 +177,11 @@ Content-Type: application/json
 {
   "sku": "SKU-001",
   "name": "Product A",
-  "description": "Mô tả sản phẩm A",
+"description": "Mô tả sản phẩm A",
   "vendor": "Vendor X",
   "collection": "Collection Y",
   "tags": ["0197c680-7fca-7368-8d62-295536b5e8ac"],
+  "categoryId": "0197c680-7fca-7368-8d62-295536b5e8ac",
   "productVariant": [
     {
       "price": 99.99,

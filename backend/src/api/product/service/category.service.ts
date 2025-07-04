@@ -1,14 +1,12 @@
+import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
+import { paginate } from '@/utils/offset-pagination';
 import { Injectable } from '@nestjs/common';
-import { CategoryRepository } from '../repository/category.repository';
+import { plainToInstance } from 'class-transformer';
+import { CategoryResponseDto } from '../dto/category-response.dto';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
-import { CategoryResponseDto } from '../dto/category-response.dto';
-import { plainToInstance } from 'class-transformer';
 import { CategoryEntity } from '../entities/category.entity';
-import { paginate } from '@/utils/offset-pagination';
-import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
-import { ProductEntity } from '../entities/product.entity';
-import { ProductVariantEntity } from '../entities/product-variant.entity';
+import { CategoryRepository } from '../repository/category.repository';
 
 @Injectable()
 export class CategoryService {
@@ -35,9 +33,6 @@ export class CategoryService {
       where: { id },
       relations: [
         'products',
-        'products.variants',
-        'products.variants.values',
-        'products.variants.attribute',
       ],
     });
     if (!category) return null;

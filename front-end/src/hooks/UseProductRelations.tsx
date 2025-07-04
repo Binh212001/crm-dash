@@ -1,14 +1,14 @@
-import { useGetCategoriesQuery } from '../services/category.service';
-import { useGetVariantAttributesQuery } from '../services/variant.service';
+import { useGetCategoriesQuery } from "../services/category.service";
+import { useGetTagsQuery } from "../services/tag.service";
 
 export function useProductRelations() {
   // Lấy danh sách category
   const { data: categoriesData } = useGetCategoriesQuery();
+  const { data: tagsData } = useGetTagsQuery();
   // Lấy danh sách variant attribute
-  const { data: variantAttributesData } = useGetVariantAttributesQuery();
 
   return {
     categories: categoriesData?.data || [],
-    variantAttributes: variantAttributesData?.data || [],
+    tags: tagsData?.data ||[]
   };
 }

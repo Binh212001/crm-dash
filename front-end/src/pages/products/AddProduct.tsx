@@ -1,96 +1,94 @@
-import React, { useState } from 'react';
-import { useProductRelations } from '../../hooks/UseProductRelations';
-import type { Category } from '../../services/category.service';
-import type { VariantAttribute, VariantValue } from '../../services/variant.service';
-import { useCreateProductMutation, type CreateProductDto } from '../../services/product.service';
-import InputText from '../../components/InputText';
+import React, { useState } from "react";
+import InputText from "../../components/InputText";
+import { useProductRelations } from "../../hooks/UseProductRelations";
+import type { Category } from "../../services/category.service";
+import {
+  useCreateProductMutation,
+  type CreateProductDto,
+} from "../../services/product.service";
+
+// The AddProduct form is rewritten to match the backend's CreateProductDto contract:
+//   - name: string (Product Title)
+//   - sku: string
+//   - description?: string
+//   - categoryId?: string
+//   - vendor?: string
+//   - collection?: string
+//   - price?: number
+//   - stock?: number
+//   - tags?: string[] (IDs)
 
 const AddProduct: React.FC = () => {
-  const { categories, variantAttributes } = useProductRelations();
-  const [createProduct, { isLoading, isSuccess, isError, error }] = useCreateProductMutation();
+  const { categories, tags } = useProductRelations();
+  const [createProduct, { isLoading, isSuccess, isError, error }] =
+    useCreateProductMutation();
 
   // Form state
-  const [sku, setSku] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [vendor, setVendor] = useState('');
-  const [collection, setCollection] = useState('');
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [selectedAttributeId, setSelectedAttributeId] = useState<string>('');
-  const [selectedVariantValueId, setSelectedVariantValueId] = useState<string>('');
+  const [sku, setSku] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [vendor, setVendor] = useState("");
+  const [collection, setCollection] = useState("");
+  const [price, setPrice] = useState<number | "">("");
+  const [stock, setStock] = useState<number | "">("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // For demo, static vendor/collection lists
-  const vendors = [
-    { id: 'vendor1', name: 'Vendor 1' },
-    { id: 'vendor2', name: 'Vendor 2' },
-    { id: 'vendor3', name: 'Vendor 3' },
-  ];
-  const collections = [
-    { id: 'collection1', name: 'Collection 1' },
-    { id: 'collection2', name: 'Collection 2' },
-    { id: 'collection3', name: 'Collection 3' },
-  ];
+  // Remove unused handleTagChange
 
-  
-    const selectedAttribute = variantAttributes.find(
-      (attr: VariantAttribute) => attr.id === selectedAttributeId
-    );
-
-  // Handle tag input (add on Enter or comma)
-  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
-      e.preventDefault();
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
-      }
-      setTagInput('');
+  const handleStockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow numbers or empty string
+    if (value === "") {
+      setStock("");
+    } else if (/^\d+$/.test(value)) {
+      setStock(Number(value));
     }
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow numbers or empty string
+    if (value === "") {
+      setPrice("");
+    } else if (/^\d+(\.\d{0,2})?$/.test(value)) {
+      setPrice(Number(value));
+    }
   };
 
-  // Handle form submit
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Compose product object
-    const product:CreateProductDto = {
-      sku: sku,
+    // Basic validation
+    if (!sku || !title) {
+      return;
+    }
+
+    const payload: CreateProductDto = {
+      sku,
       name: title,
-      description,
-      categoryId: categoryId,
-      vendor,
-      collection,
-      tags,
-      productVariant: selectedAttributeId && selectedVariantValueId && selectedAttribute
-        ? [
-            {
-              attributeId: selectedAttribute.id,
-              values: [selectedVariantValueId],
-              price: 0, // You may want to add a price input in the form and use its value here
-            },
-          ]
-        : [],
+      description: description || undefined,
+      categoryId: categoryId || undefined,
+      vendor: vendor || undefined,
+      collection: collection || undefined,
+      price: price === "" ? undefined : price,
+      stock: stock === "" ? undefined : stock,
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
     };
+
     try {
-      await createProduct(product).unwrap();
-      // Optionally reset form or redirect
-      setSku('');
-      setTitle('');
-      setDescription('');
-      setCategoryId('');
-      setVendor('');
-      setCollection('');
-      setTags([]);
-      setSelectedAttributeId('');
-      setSelectedVariantValueId('');
+      await createProduct(payload).unwrap();
+      setSku("");
+      setTitle("");
+      setDescription("");
+      setCategoryId("");
+      setVendor("");
+      setCollection("");
+      setPrice("");
+      setStock("");
+      setSelectedTags([]);
     } catch (err) {
-      console.log("🚀 ~ handleSubmit ~ err:", err)
-      // error handled by RTK Query
+      console.log("🚀 ~ handleSubmit ~ err:", err);
     }
   };
 
@@ -104,16 +102,45 @@ const AddProduct: React.FC = () => {
             <div>
               <h2 className="text-base font-semibold mb-2">Create product</h2>
               {isSuccess && (
-                <div className="text-green-600 text-sm mb-2">Product created successfully!</div>
+                <div className="text-green-600 text-sm mb-2">
+                  Product created successfully!
+                </div>
               )}
               {isError && (
                 <div className="text-red-600 text-sm mb-2">
-                  Failed to create product{error && (typeof error === 'string' ? `: ${error}` : '')}
+                  Failed to create product
+                  {error && (typeof error === "string" ? `: ${error}` : "")}
                 </div>
               )}
             </div>
             {/* Overview */}
             <div className="bg-white rounded-lg p-6 shadow flex flex-col gap-6">
+              <h3 className="font-semibold text-sm mb-4 w-full">Image</h3>
+              <div className="w-full flex flex-col">
+                <div className="w-32 h-32  border border-dashed border-gray-200 rounded flex items-center justify-center mb-4">
+                  <svg
+                    width="48"
+                    height="48"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    className="text-gray-400"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 16V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12l2 2 4-4"
+                    />
+                  </svg>
+                </div>
+              </div>
               <div>
                 <h3 className="font-semibold text-sm mb-4">Overview</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,7 +149,7 @@ const AddProduct: React.FC = () => {
                       label="Product SKU"
                       placeholder="SKU"
                       value={sku}
-                      onChange={e => setSku(e.target.value)}
+                      onChange={(e) => setSku(e.target.value)}
                       required
                     />
                   </div>
@@ -131,28 +158,33 @@ const AddProduct: React.FC = () => {
                       label="Product Title"
                       placeholder="Product Title"
                       value={title}
-                      onChange={e => setTitle(e.target.value)}
+                      onChange={(e) => setTitle(e.target.value)}
                       required
                     />
                   </div>
+                 
                 </div>
                 <div className="mt-4">
-                  <label className="block text-xs font-medium mb-1">Description</label>
+                  <label className="block text-xs font-medium mb-1">
+                    Description
+                  </label>
                   <textarea
                     className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none"
                     rows={3}
                     placeholder="Product description"
                     value={description}
-                    onChange={e => setDescription(e.target.value)}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium mb-1">Category</label>
+                    <label className="block text-xs font-medium mb-1">
+                      Category
+                    </label>
                     <select
                       className="w-full border border-gray-200 rounded px-3 py-2 text-sm  focus:outline-none"
                       value={categoryId}
-                      onChange={e => setCategoryId(e.target.value)}
+                      onChange={(e) => setCategoryId(e.target.value)}
                     >
                       <option value="">Select category</option>
                       {categories.map((cat: Category) => (
@@ -163,85 +195,70 @@ const AddProduct: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1">Vendor</label>
-                    <select
-                      className="w-full border border-gray-200 rounded px-3 py-2 text-sm  focus:outline-none"
-                      value={vendor}
-                      onChange={e => setVendor(e.target.value)}
-                    >
-                      <option value="">Select vendor</option>
-                      {vendors.map((vendor) => (
-                        <option key={vendor.id} value={vendor.id}>
-                          {vendor.name}
-                        </option>
-                      ))}
-                    </select>
+                    <label className="block text-xs font-medium mb-1">
+                      Tags
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {tags &&
+                        tags.map((tag) => (
+                          <label key={tag.id} className="flex items-center space-x-2 text-sm">
+                            <input
+                              type="checkbox"
+                              value={tag.id}
+                              checked={selectedTags.includes(tag.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTags([...selectedTags, tag.id]);
+                                } else {
+                                  setSelectedTags(selectedTags.filter((id) => id !== tag.id));
+                                }
+                              }}
+                              className="form-checkbox"
+                            />
+                            <span>{tag.name}</span>
+                          </label>
+                        ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             {/* Additional Information */}
             <div className="bg-white rounded-lg p-6 shadow flex flex-col gap-6">
-              <div>
-                <h3 className="font-semibold text-sm mb-4">Additional Information</h3>
-                <div className="mb-4">
-                  <label className="block text-xs font-medium mb-1">Collection</label>
-                  <select
-                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm  focus:outline-none"
+              <h3 className="font-semibold text-sm mb-4">
+                Additional Information
+              </h3>
+              <div className="mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InputText
+                    label="Vendor"
+                    placeholder="Vendor"
+                    value={vendor}
+                    onChange={(e) => setVendor(e.target.value)}
+                  />
+                  <InputText
+                    label="Collection"
+                    placeholder="Collection"
                     value={collection}
-                    onChange={e => setCollection(e.target.value)}
-                  >
-                    <option value="">Select collection</option>
-                    {collections.map((col) => (
-                      <option key={col.id} value={col.id}>
-                        {col.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-xs font-medium mb-1">Variants</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Variant Attribute</label>
-                      <select
-                        className="w-full border border-gray-200 rounded px-3 py-2 text-sm  focus:outline-none"
-                        value={selectedAttributeId}
-                        onChange={e => {
-                          setSelectedAttributeId(e.target.value);
-                          setSelectedVariantValueId('');
-                        }}
-                      >
-                        <option value="">Select attribute</option>
-                        {variantAttributes.map((attr: VariantAttribute) => (
-                          <option key={attr.id} value={attr.id}>
-                            {attr.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Variant Value</label>
-                      <select
-                        className="w-full border border-gray-200 rounded px-3 py-2 text-sm  focus:outline-none"
-                        value={selectedVariantValueId}
-                        onChange={e => setSelectedVariantValueId(e.target.value)}
-                        disabled={!selectedAttribute}
-                      >
-                        <option value="">Select value</option>
-                        {selectedAttribute &&
-                          selectedAttribute.values &&
-                          selectedAttribute.values.map((val: VariantValue) => (
-                            <option key={val.id} value={val.id}>
-                              {val.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Select a variant attribute and its value (e.g. Size: Medium, Color: Red)
-                  </p>
+                    onChange={(e) => setCollection(e.target.value)}
+                  />
+                  <InputText
+                    label="Stock"
+                    placeholder="Stock"
+                    value={stock}
+                    onChange={handleStockChange}
+                    type="number"
+                    min="0"
+                  />
+                    <InputText
+                      label="Price"
+                      placeholder="Price"
+                      value={price}
+                      onChange={handlePriceChange}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                    />
                 </div>
               </div>
             </div>
@@ -251,54 +268,11 @@ const AddProduct: React.FC = () => {
                 className="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700 transition"
                 disabled={isLoading}
               >
-                {isLoading ? 'Creating...' : 'Create Product'}
+                {isLoading ? "Creating..." : "Create Product"}
               </button>
             </div>
           </div>
           {/* Sidebar */}
-          <div className="w-full lg:w-[320px] flex flex-col gap-6">
-            {/* Image Upload */}
-            <div className="bg-white rounded-lg p-6 shadow flex flex-col items-center">
-              <h3 className="font-semibold text-sm mb-4 w-full">Image</h3>
-              <div className="w-full flex flex-col items-center">
-                <div className="w-32 h-32  border border-dashed border-gray-200 rounded flex items-center justify-center mb-4">
-                  <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-400">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12l2 2 4-4" />
-                  </svg>
-                </div>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium" type="button">Upload Image</button>
-              </div>
-            </div>
-            {/* Product Tags */}
-            <div className="bg-white rounded-lg p-6 shadow">
-              <h3 className="font-semibold text-sm mb-4">Product Tags</h3>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map(tag => (
-                  <span
-                    key={tag}
-                    className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex items-center"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      className="ml-1 text-blue-500 hover:text-blue-700"
-                      onClick={() => handleRemoveTag(tag)}
-                      aria-label={`Remove tag ${tag}`}
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <InputText
-                placeholder="Add tags for product..."
-                value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
-                onKeyDown={handleTagInputKeyDown}
-              />
-            </div>
-          </div>
         </div>
       </form>
     </div>

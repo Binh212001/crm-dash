@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { StringField, StringFieldOptional, UUIDFieldOptional, ClassFieldOptional } from '@/decorators/field.decorators';
-import { CreateProductVariantDto } from './create-product-variant.dto';
 
 export class CreateProductDto {
   @StringField()
@@ -21,10 +20,12 @@ export class CreateProductDto {
   @StringFieldOptional()
   collection?: string;
 
+  @StringFieldOptional()
+  stock?: string;
+  @StringFieldOptional()
+  price?: string;
+
   @UUIDFieldOptional({ each: true })
   tags?: string[];
 
-  @ClassFieldOptional(() => CreateProductVariantDto, { each: true })
-  
-  productVariant?: CreateProductVariantDto[];
 }
