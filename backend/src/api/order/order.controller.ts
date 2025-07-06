@@ -4,8 +4,9 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrderDto } from './dto/list-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderStatus, PaymentStatus } from './entities/order.entity';
+import { OrderStatus } from './entities/order.entity';
 import { OrderService } from './order.service';
+import { DeleteBaseResDto } from '../base/dto/delete-base.res.dto';
 
 @Controller('orders')
 export class OrderController {
@@ -39,17 +40,10 @@ export class OrderController {
     return this.orderService.updateStatus(id, data.status);
   }
 
-  @Put(':id/payment-status')
-  async updatePaymentStatus(
-    @Param('id') id: string,
-    @Body() data: { paymentStatus: PaymentStatus }
-  ): Promise<OrderResponseDto> {
-    return this.orderService.updatePaymentStatus(id, data.paymentStatus);
-  }
+
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<{ deleted: boolean }> {
-    await this.orderService.remove(id);
-    return { deleted: true };
+  async remove(@Param('id') id: string): Promise<DeleteBaseResDto> {
+    return this.orderService.remove(id);
   }
 } 

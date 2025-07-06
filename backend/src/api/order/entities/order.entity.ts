@@ -1,68 +1,70 @@
-import { AbstractEntity } from '@/database/entities/abstract.entity';
-import { Column, Entity, PrimaryColumn, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm';
-import { v7 } from 'uuid';
-import { CustomerEntity } from '@/api/customer/entities/customer.entity';
-import { UserEntity } from '@/api/user/entities/user.entity';
-import { OrderItemEntity } from './order-item.entity';
+import { AbstractEntity } from "@/database/entities/abstract.entity";
+import {
+  Column,
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+  Relation,
+  BeforeInsert,
+} from "typeorm";
+import { v7 } from "uuid";
+import { CustomerEntity } from "@/api/customer/entities/customer.entity";
+import { UserEntity } from "@/api/user/entities/user.entity";
+import { OrderItemEntity } from "./order-item.entity";
 
 export enum OrderStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  PROCESSING = 'processing',
-  SHIPPED = 'shipped',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
-  REFUNDED = 'refunded',
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
+  PROCESSING = "processing",
+  SHIPPED = "shipped",
+  DELIVERED = "delivered",
+  CANCELLED = "cancelled",
+  REFUNDED = "refunded",
 }
 
 export enum PaymentStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  FAILED = 'failed',
-  REFUNDED = 'refunded',
-  PARTIALLY_REFUNDED = 'partially_refunded',
+  PENDING = "pending",
+  PAID = "paid",
+  FAILED = "failed",
+  REFUNDED = "refunded",
+  PARTIALLY_REFUNDED = "partially_refunded",
 }
 
-@Entity('orders')
+@Entity("orders")
 export class OrderEntity extends AbstractEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn("uuid")
   id: string = v7();
 
   @Column({ length: 50, unique: true })
-  @Index('UQ_order_number')
+  @Index("UQ_order_number")
   orderNumber: string;
 
-  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
+  @Column({ type: "enum", enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
-  paymentStatus: PaymentStatus;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   subtotal: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
   tax: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
   shipping: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   total: number;
 
-  @Column({ nullable: true })
-  customerId?: string;
+  
+  @ManyToOne(() => CustomerEntity, { eager: true })
+  @JoinColumn({ name: "customerId" })
+  customer?: Relation<CustomerEntity>;
 
-  @ManyToOne(() => CustomerEntity, { nullable: true })
-  @JoinColumn({ name: 'customerId' })
-  customer?: CustomerEntity;
-
-  @Column({ nullable: true })
-  userId?: string;
-
-  @ManyToOne(() => UserEntity, { nullable: true })
-  @JoinColumn({ name: 'userId' })
-  user?: UserEntity;
+  @ManyToOne(() => UserEntity, { eager: true })
+  @JoinColumn({ name: "userId" })
+  user?: Relation<UserEntity>;
 
   @Column({ nullable: true })
   notes?: string;
@@ -85,11 +87,22 @@ export class OrderEntity extends AbstractEntity {
   @Column({ nullable: true })
   deliveredAt?: Date;
 
-  @OneToMany(() => OrderItemEntity, item => item.order, { cascade: true })
-  items: OrderItemEntity[];
+  @OneToMany(() => OrderItemEntity, (item) => item.order, { cascade: true })
+  items: Relation<OrderItemEntity>[];
+
+  @BeforeInsert()
+  generateOrderNumber() {
+    if (!this.orderNumber) {
+      const timestamp = Date.now();
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      this.orderNumber = `ORD-${timestamp}-${random}`;
+    }
+    
+    
+  }
 
   constructor(data?: Partial<OrderEntity>) {
     super();
     Object.assign(this, data);
   }
-} 
+}

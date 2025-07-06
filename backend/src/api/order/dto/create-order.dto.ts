@@ -1,14 +1,14 @@
+import { CreateBaseReqDto } from "@/api/base/dto/create-base.req.dto";
 import {
-  StringFieldOptional,
+  ClassField,
   EnumFieldOptional,
   NumberField,
   NumberFieldOptional,
+  StringFieldOptional,
   UUIDFieldOptional,
-  ClassField,
-} from '@/decorators/field.decorators';
-import { CreateBaseReqDto } from '@/api/base/dto/create-base.req.dto';
-import { CreateOrderItemDto } from './create-order-item.dto';
-import { OrderStatus, PaymentStatus } from '../entities/order.entity';
+} from "@/decorators/field.decorators";
+import { OrderStatus } from "../entities/order.entity";
+import { CreateOrderItemDto } from "./create-order-item.dto";
 
 export class CreateOrderDto extends CreateBaseReqDto {
   @StringFieldOptional({ maxLength: 50 })
@@ -16,9 +16,6 @@ export class CreateOrderDto extends CreateBaseReqDto {
 
   @EnumFieldOptional(() => OrderStatus)
   status?: OrderStatus;
-
-  @EnumFieldOptional(() => PaymentStatus)
-  paymentStatus?: PaymentStatus;
 
   @NumberField({ min: 0 })
   subtotal: number;

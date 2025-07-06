@@ -10,12 +10,6 @@ const CustomerList = () => {
   const navigate = useNavigate();
 
   const customers = data?.data || [];
-  const pagination = data?.pagination || {
-    limit: 10,
-    currentPage: 1,
-    totalRecords: 0,
-    totalPages: 0,
-  };
 
   if (isLoading) {
     return (
@@ -129,7 +123,7 @@ const CustomerList = () => {
                         className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
                         title="Edit"
                         onClick={() =>
-                          navigate("/update-customer" + customer.id)
+                          navigate("/update-customer/" + customer.id)
                         }
                       >
                         <svg

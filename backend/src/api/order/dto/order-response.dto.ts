@@ -2,43 +2,20 @@ import { Expose, Type } from 'class-transformer';
 import { BaseResDto } from '@/api/base/dto/base.res.dto';
 import { OrderStatus, PaymentStatus } from '../entities/order.entity';
 import { CustomerResponseDto } from '@/api/customer/dto/customer-response.dto';
+import { ProductResponseDto } from '@/api/product/dto/product-response';
 
 /**
  * Mirrors the structure of OrderItemEntity for API responses.
  */
 
 
-// Dummy DTOs for product and variant, replace with actual imports if available
-export class ProductResponseDto {
-  @Expose()
-  id: string;
-
-  @Expose()
-  name: string;
-}
 
 
-
-export class ProductVariantResponseDto {
-  @Expose()
-  id: string;
-
-  @Expose()
-  name: string;
-}
 
 export class OrderItemResponseDto extends BaseResDto {
   @Expose()
   id: string;
 
-  @Expose()
-  orderId: string;
-
-  @Expose()
-  productId?: string;
-
-  @Expose()
-  productVariantId?: string;
 
   @Expose()
   quantity: number;
@@ -46,10 +23,6 @@ export class OrderItemResponseDto extends BaseResDto {
   @Expose()
   @Type(() => ProductResponseDto)
   product?: ProductResponseDto;
-
-  @Expose()
-  @Type(() => ProductVariantResponseDto)
-  productVariant?: ProductVariantResponseDto;
 
   @Expose()
   createdAt: Date;
@@ -69,8 +42,7 @@ export class OrderResponseDto extends BaseResDto {
   @Expose()
   status: OrderStatus;
 
-  @Expose()
-  paymentStatus: PaymentStatus;
+
 
   @Expose()
   subtotal: number;

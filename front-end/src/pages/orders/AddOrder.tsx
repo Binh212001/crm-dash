@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import InputText from "../../components/InputText";
+import { useGetProductsQuery } from "@/services/product.service";
+import { useGetCustomersQuery } from "@/services/customer.service";
+import Select from "@/components/Select";
+import { useCreateOrderMutation } from "@/services/order.service";
 
 // This interface mirrors the CreateOrderItemDto from backend
 interface CreateOrderItemDto {
@@ -10,8 +14,6 @@ interface CreateOrderItemDto {
 // This interface mirrors the CreateOrderDto from backend
 interface CreateOrderDto {
   orderNumber?: string;
-  status?: string;
-  paymentStatus?: string;
   subtotal: number;
   tax?: number;
   shipping?: number;
@@ -25,10 +27,17 @@ interface CreateOrderDto {
 }
 
 const AddOrder: React.FC = () => {
+  const { data: products } = useGetProductsQuery({
+    page: 1,
+    limit: 100,
+  });
+  const { data: customers } = useGetCustomersQuery();
+  const { data: users } = useGetCustomersQuery();
+  const [productSelection, setProductSelection] = useState<string>("");
+  const [createOrder] = useCreateOrderMutation();
+
+  const [quantity, setQuantity] = useState<number>(1);
   const [order, setOrder] = useState<CreateOrderDto>({
-    orderNumber: "",
-    status: "",
-    paymentStatus: "",
     subtotal: 0,
     tax: 0,
     shipping: 0,
@@ -41,60 +50,63 @@ const AddOrder: React.FC = () => {
     items: [],
   });
 
-  const [item, setItem] = useState<CreateOrderItemDto>({
-    productId: "",
-    quantity: 1,
-  });
-
   const handleOrderChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setOrder((prev) => ({
-      ...prev,
-      [name]: name === "subtotal" || name === "tax" || name === "shipping" || name === "total"
+    const numericValue =
+      name === "subtotal" || name === "tax" || name === "shipping"
         ? Number(value)
-        : value,
-    }));
-  };
+        : value;
 
-  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setItem((prev) => ({
-      ...prev,
-      [name]: name === "quantity" ? Number(value) : value,
-    }));
+    setOrder((prev) => {
+      const updated = {
+        ...prev,
+        [name]: numericValue,
+      };
+
+      // Tính toán lại total
+      const subtotal = name === "subtotal" ? Number(value) : prev.subtotal;
+      const tax = name === "tax" ? Number(value) : prev.tax ?? 0;
+      const shipping = name === "shipping" ? Number(value) : prev.shipping ?? 0;
+
+      updated.total = subtotal + tax + shipping;
+
+      return updated;
+    });
   };
 
   const addItem = () => {
+    if (!productSelection || quantity <= 0) {
+      alert("Please select a product and enter a valid quantity.");
+      return;
+    }
+
+    const product = products?.data.find((p) => p.id === productSelection);
+    const newItem: CreateOrderItemDto = {
+      productId: productSelection,
+      quantity: quantity,
+    };
+
     setOrder((prev) => ({
       ...prev,
-      items: [...prev.items, { ...item }],
+      subtotal: prev.subtotal + (product?.price || 0) * quantity,
+      items: [...prev.items, newItem],
     }));
-    setItem({
-      productId: "",
-      quantity: 1,
-    });
+
+    // Reset selection and quantity
+    setProductSelection("");
+    setQuantity(1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(order),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to create order");
-      }
+      console.log("🚀 ~ handleSubmit ~ order:", order);
+      await createOrder(order).unwrap();
       alert("Order created!");
       setOrder({
         orderNumber: "",
-        status: "",
-        paymentStatus: "",
         subtotal: 0,
         tax: 0,
         shipping: 0,
@@ -106,7 +118,8 @@ const AddOrder: React.FC = () => {
         billingAddress: "",
         items: [],
       });
-    } catch {
+    } catch (error) {
+      console.error("Error creating order:", error);
       alert("Error creating order");
     }
   };
@@ -118,66 +131,21 @@ const AddOrder: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left column: Order Info */}
           <div className="flex-1 space-y-4">
-            <InputText
-              label="Order Number"
-              name="orderNumber"
-              placeholder="Order Number"
-              value={order.orderNumber}
-              onChange={handleOrderChange}
+            <Select
+              data={customers}
+              select={order.customerId || ""}
+              setSelect={(value) =>
+                setOrder((prev) => ({ ...prev, customerId: value }))
+              }
+              label="Customer"
             />
-            <InputText
-              label="Status"
-              name="status"
-              placeholder="Status"
-              value={order.status}
-              onChange={handleOrderChange}
-            />
-          
-            <InputText
-              label="Subtotal"
-              name="subtotal"
-              type="number"
-              placeholder="Subtotal"
-              value={order.subtotal}
-              onChange={handleOrderChange}
-            />
-            <InputText
-              label="Tax"
-              name="tax"
-              type="number"
-              placeholder="Tax"
-              value={order.tax}
-              onChange={handleOrderChange}
-            />
-            <InputText
-              label="Shipping"
-              name="shipping"
-              type="number"
-              placeholder="Shipping"
-              value={order.shipping}
-              onChange={handleOrderChange}
-            />
-            <InputText
-              label="Total"
-              name="total"
-              type="number"
-              placeholder="Total"
-              value={order.total}
-              onChange={handleOrderChange}
-            />
-            <InputText
-              label="Customer ID"
-              name="customerId"
-              placeholder="Customer ID"
-              value={order.customerId}
-              onChange={handleOrderChange}
-            />
-            <InputText
-              label="User ID"
-              name="userId"
-              placeholder="User ID"
-              value={order.userId}
-              onChange={handleOrderChange}
+            <Select
+              data={users}
+              select={order.userId || ""}
+              setSelect={(value) =>
+                setOrder((prev) => ({ ...prev, userId: value }))
+              }
+              label="User"
             />
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -205,28 +173,56 @@ const AddOrder: React.FC = () => {
               value={order.billingAddress}
               onChange={handleOrderChange}
             />
+            <InputText
+              label="Subtotal"
+              name="subtotal"
+              type="number"
+              placeholder="Subtotal"
+              value={order.subtotal}
+              disabled
+            />
+            <InputText
+              label="Tax"
+              name="tax"
+              type="number"
+              placeholder="Tax"
+              value={order.tax}
+              onChange={handleOrderChange}
+            />
+            <InputText
+              label="Shipping"
+              name="shipping"
+              type="number"
+              placeholder="Shipping"
+              value={order.shipping}
+              onChange={handleOrderChange}
+            />
+            <InputText
+              label="Total"
+              name="total"
+              type="number"
+              placeholder="Total"
+              disabled
+              value={order.total}
+            />
           </div>
           {/* Right column: Order Items */}
           <div className="flex-1 space-y-4 border-t pt-4 mt-4 md:mt-0 md:pt-0 md:border-t-0 md:border-l md:pl-6">
             <h3 className="font-semibold mb-2">Add Order Item</h3>
-            
-            <InputText
+            <Select
+              data={products}
+              select={productSelection}
+              setSelect={setProductSelection}
               label="Product"
-              name="productId"
-              placeholder="Product ID"
-              value={item.productId}
-              onChange={handleItemChange}
-              containerClassName="mb-2"
             />
-           
             <InputText
               label="Quantity"
               name="quantity"
               type="number"
               min={1}
               placeholder="Quantity"
-              value={item.quantity}
-              onChange={handleItemChange}
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
               containerClassName="mb-2"
             />
             <button
@@ -240,9 +236,7 @@ const AddOrder: React.FC = () => {
               <h4 className="font-semibold">Order Items</h4>
               <ul className="list-disc pl-5">
                 {order.items.map((it, idx) => (
-                  <li key={idx}>
-                    Product: X Quantity: {it.quantity}
-                  </li>
+                  <li key={idx}>Product: X Quantity: {it.quantity}</li>
                 ))}
               </ul>
             </div>

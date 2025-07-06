@@ -3,7 +3,7 @@ import { useGetProductsQuery } from "../../services/product.service";
 import { useNavigate } from "react-router";
 
 const ProductList: React.FC = () => {
-  const { data, isLoading, isError } = useGetProductsQuery();
+  const { data, isLoading, isError } = useGetProductsQuery({});
   // Import and use the useProductRelations hook to get categories and variant attributes
   // (Assumes you have: import { useProductRelations } from "../../hooks/UseProductRelations"; at the top)
 

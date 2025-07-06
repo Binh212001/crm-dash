@@ -1,17 +1,7 @@
-import {
-  UUIDField,
-  UUIDFieldOptional,
-  NumberField,
-} from '@/decorators/field.decorators';
-import { CreateBaseReqDto } from '@/api/base/dto/create-base.req.dto';
+import { CreateBaseReqDto } from "@/api/base/dto/create-base.req.dto";
+import { NumberField, UUIDField } from "@/decorators/field.decorators";
 
 export class CreateOrderItemDto extends CreateBaseReqDto {
-  @UUIDField()
-  orderId: string;
-
-  @UUIDField()
-  productVariantId?: string;
-
   @UUIDField()
   productId?: string;
 

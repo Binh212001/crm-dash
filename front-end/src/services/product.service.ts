@@ -53,18 +53,33 @@ export interface UpdateProductDto {
   price?: number;
 }
 
+export interface ProductParam {
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
 export const productApi = createApi({
   reducerPath: "productApi",
   baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/" }),
   endpoints: (builder) => ({
     getProducts: builder.query<
       { data: ProductResponseDto[]; pagination: Pagination },
-      void
+      ProductParam
     >({
-      query: () => ({
-        url: "products",
-        method: "GET",
-      }),
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params.q) searchParams.append("q", params.q);
+        if (params.page !== undefined)
+          searchParams.append("page", String(params.page));
+        if (params.limit !== undefined)
+          searchParams.append("limit", String(params.limit));
+        const queryString = searchParams.toString();
+        return {
+          url: `products${queryString ? `?${queryString}` : ""}`,
+          method: "GET",
+        };
+      },
     }),
     getProduct: builder.query<ProductResponseDto, string>({
       query: (id) => ({
