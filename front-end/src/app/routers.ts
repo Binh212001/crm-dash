@@ -1,25 +1,24 @@
 import { createBrowserRouter } from "react-router";
 import Layout from "../components/Layout";
-import Dashboard from "../pages/dashboard/Dashboard";
-import CustomerList from "../pages/customers/CustomerList";
-import ProductList from "../pages/products/ProductList";
-import OrderList from "../pages/orders/OrderList";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-import Inbox from "../pages/communication/Inbox";
-import Invoice from "../pages/business/Invoice";
-import Todo from "../pages/calendar/Todo";
-import Calender from "../pages/calendar/Calender";
-import UserList from "../pages/user/User";
 import Pricing from "../pages/business/Pricing";
-import AddProduct from "../pages/products/AddProduct";
+import Calender from "../pages/calendar/Calender";
+import Todo from "../pages/calendar/Todo";
+import Inbox from "../pages/communication/Inbox";
 import AddCustomer from "../pages/customers/AddCustomer";
+import CustomerList from "../pages/customers/CustomerList";
+import UpdateCustomer from "../pages/customers/UpdateCustomer";
+import Dashboard from "../pages/dashboard/Dashboard";
 import AddOrder from "../pages/orders/AddOrder";
+import OrderDetail from "../pages/orders/OrderDetail";
+import OrderList from "../pages/orders/OrderList";
+import AddProduct from "../pages/products/AddProduct";
+import ProductList from "../pages/products/ProductList";
+import UpdateProduct from "../pages/products/UpdateProduct";
 import AddUser from "../pages/user/AddUser";
 import UpdateUser from "../pages/user/UpdateUser";
-import UpdateCustomer from "../pages/customers/UpdateCustomer";
-import UpdateProduct from "../pages/products/UpdateProduct";
-import OrderDetail from "../pages/orders/OrderDetail";
+import UserList from "../pages/user/User";
 
 export const router = createBrowserRouter([
   {
@@ -34,7 +33,6 @@ export const router = createBrowserRouter([
       { path: "user", Component: UserList },
       { path: "calender", Component: Calender },
       { path: "todo", Component: Todo },
-      { path: "invoice", Component: Invoice },
       { path: "pricing", Component: Pricing },
       { path: "add-product", Component: AddProduct },
       { path: "add-customer", Component: AddCustomer },

@@ -33,7 +33,6 @@ const pagesNav: NavItem[] = [
   { name: "User", href: "/user", icon: MdGroup },
   { name: "Calender", href: "/calender", icon: MdCalendarToday },
   { name: "To-Do", href: "/todo", icon: MdCheckBox },
-  { name: "Invoice", href: "/invoice", icon: MdReceipt },
   { name: "Pricing", href: "/pricing", icon: MdAttachMoney },
 ];
 
