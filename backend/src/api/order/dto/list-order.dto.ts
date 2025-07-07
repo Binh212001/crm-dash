@@ -1,19 +1,14 @@
-import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { PageOptionsDto } from '@/common/dto/offset-pagination/page-options.dto';
-import { OrderStatus, PaymentStatus } from '../entities/order.entity';
+import { OrderStatus } from '../entities/order.entity';
+import { StringFieldOptional, EnumFieldOptional, DateFieldOptional } from '@/decorators/field.decorators';
 
 export class ListOrderDto extends PageOptionsDto {
-  @IsOptional()
-  @IsString()
+  @StringFieldOptional()
   search?: string;
 
-  @IsOptional()
-  @IsEnum(OrderStatus)
+  @EnumFieldOptional(() => OrderStatus)
   status?: OrderStatus;
 
-
-  @IsOptional()
-  @IsUUID()
-  customerId?: string;
-
-} 
+  @DateFieldOptional()
+  createdAt?: Date;
+}

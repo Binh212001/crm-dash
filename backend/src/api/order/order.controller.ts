@@ -22,6 +22,12 @@ export class OrderController {
     return this.orderService.findAll(dto);
   }
 
+  @Get('overview')
+  async getOrderOverview() {
+    const res = this.orderService.getOrderOverview();
+    return res
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<OrderResponseDto> {
     return this.orderService.findOne(id);
@@ -46,4 +52,5 @@ export class OrderController {
   async remove(@Param('id') id: string): Promise<DeleteBaseResDto> {
     return this.orderService.remove(id);
   }
+ 
 } 

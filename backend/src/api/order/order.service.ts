@@ -1,7 +1,7 @@
 import { BaseService } from "@/api/base/base.service";
 import { OffsetPaginatedDto } from "@/common/dto/offset-pagination/paginated.dto";
 import { paginate } from "@/utils/offset-pagination";
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
 import { ILike } from "typeorm";
 import { CreateOrderDto } from "./dto/create-order.dto";
@@ -16,6 +16,9 @@ import {
 import { OrderItemRepository } from "./repositories/order-item.repository";
 import { OrderRepository } from "./repositories/order.repository";
 import { DeleteBaseResDto } from "../base/dto/delete-base.res.dto";
+import { CustomerRepository } from "../customer/customer.repository";
+import { UserRepository } from "../user/user.repository";
+import { OrderOverviewDto } from "./dto/order-overview.dto";
 
 @Injectable()
 export class OrderService extends BaseService<
@@ -27,7 +30,9 @@ export class OrderService extends BaseService<
 > {
   constructor(
     private readonly orderRepository: OrderRepository,
-    private readonly orderItemRepository: OrderItemRepository
+    private readonly orderItemRepository: OrderItemRepository,
+    private readonly customerRepository: CustomerRepository,
+    private readonly userRepository: UserRepository
   ) {
     super(orderRepository);
   }
@@ -40,6 +45,7 @@ export class OrderService extends BaseService<
       .leftJoinAndSelect("order.customer", "customer")
       .leftJoinAndSelect("order.user", "user")
       .leftJoinAndSelect("order.items", "items")
+      .leftJoinAndSelect("items.product", "product")
       .orderBy("order.createdAt", "DESC");
 
     if (dto.search) {
@@ -54,9 +60,9 @@ export class OrderService extends BaseService<
       queryBuilder.andWhere("order.status = :status", { status: dto.status });
     }
 
-    if (dto.customerId) {
-      queryBuilder.andWhere("order.customerId = :customerId", {
-        customerId: dto.customerId,
+    if (dto.createdAt) {
+      queryBuilder.andWhere("order.createdAt = :createdAt", {
+        createdAt: dto.createdAt,
       });
     }
 
@@ -74,7 +80,7 @@ export class OrderService extends BaseService<
   async findOne(id: string): Promise<OrderResponseDto> {
     const order = await this.orderRepository.findOne({
       where: { id },
-      relations: ["customer", "user", "items", "items.productVariant"],
+      relations: ["customer", "user", "items"],
     });
 
     if (!order) {
@@ -85,14 +91,28 @@ export class OrderService extends BaseService<
   }
 
   async create(dto: CreateOrderDto): Promise<OrderResponseDto> {
-    const { items, ...orderData } = dto;
+    const { items, customerId, userId, ...orderData } = dto;
 
     // Generate order number if not provided
     if (!orderData.orderNumber) {
       orderData.orderNumber = this.generateOrderNumber();
     }
 
-    const order = this.orderRepository.create(orderData);
+    const checkCustomer = await this.customerRepository.existsBy({
+      id: customerId,
+    });
+    if (!checkCustomer) {
+      throw new BadRequestException("Customer not found");
+    }
+    const checkUser = await this.userRepository.existsBy({ id: userId });
+    if (!checkUser) {
+      throw new BadRequestException("User not found");
+    }
+    const order = this.orderRepository.create({
+      ...orderData,
+      customer: { id: customerId },
+      user: { id: userId },
+    });
     const savedOrder = await this.orderRepository.save(order);
 
     // Create order items
@@ -158,9 +178,10 @@ export class OrderService extends BaseService<
     const updateData: any = { status };
 
     // Update timestamps based on status
-    if (status === OrderStatus.SHIPPED) {
+    // Only update shippedAt/deliveredAt if the status is being set to the correct enum value
+    if (status === OrderStatus.PROCESSING) {
       updateData.shippedAt = new Date();
-    } else if (status === OrderStatus.DELIVERED) {
+    } else if (status === OrderStatus.COMPLETED) {
       updateData.deliveredAt = new Date();
     }
 
@@ -185,5 +206,39 @@ export class OrderService extends BaseService<
       .toString()
       .padStart(3, "0");
     return `ORD-${timestamp}-${random}`;
+  }
+
+  /**
+   * Get order overview statistics: total orders, completed, pending, total revenue
+   * Đếm chính xác completed, pending, và tổng số order, tổng doanh thu (tất cả orders)
+   */
+  async getOrderOverview(): Promise<OrderOverviewDto> {
+    // Đếm tổng số orders
+    const totalOrders = await this.orderRepository.count();
+
+    // Đếm số order completed
+    const completed = await this.orderRepository.count({
+      where: { status: OrderStatus.COMPLETED },
+    });
+
+    // Đếm số order pending
+    const pending = await this.orderRepository.count({
+      where: { status: OrderStatus.PENDING },
+    });
+
+    // Tổng doanh thu: sum của tất cả order.total (không chỉ completed)
+    const { sum } = await this.orderRepository
+      .createQueryBuilder("order")
+      .select("SUM(order.total)", "sum")
+      .getRawOne();
+
+    const totalRevenue = Number(sum) || 0;
+
+    return {
+      totalOrders,
+      completed,
+      pending,
+      totalRevenue,
+    };
   }
 }

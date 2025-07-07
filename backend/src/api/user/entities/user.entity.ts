@@ -42,6 +42,10 @@ export class UserEntity extends AbstractEntity {
     length: 100,
   })
   lastName: string;
+  @Column({
+    nullable: true
+  })
+  name: string;
   @Column()
   @Index('UQ_user_email', { where: '"deleted_at" IS NULL', unique: true })
   email!: string;
@@ -92,6 +96,7 @@ export class UserEntity extends AbstractEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
+    this.name = this.firstName + " " + this.lastName
     if (this.password && !this.isPasswordHashed()) {
       this.password = await hashPassword(this.password);
     }

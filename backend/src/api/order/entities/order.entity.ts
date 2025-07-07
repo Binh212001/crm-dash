@@ -17,12 +17,9 @@ import { OrderItemEntity } from "./order-item.entity";
 
 export enum OrderStatus {
   PENDING = "pending",
-  CONFIRMED = "confirmed",
   PROCESSING = "processing",
-  SHIPPED = "shipped",
-  DELIVERED = "delivered",
+  COMPLETED = "completed",
   CANCELLED = "cancelled",
-  REFUNDED = "refunded",
 }
 
 export enum PaymentStatus {
@@ -51,13 +48,12 @@ export class OrderEntity extends AbstractEntity {
   @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
   tax: number;
 
-  @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
+  @Column({ default: 0 })
   shipping: number;
 
-  @Column({ type: "decimal", precision: 10, scale: 2 })
+  @Column({ default: 0 })
   total: number;
 
-  
   @ManyToOne(() => CustomerEntity, { eager: true })
   @JoinColumn({ name: "customerId" })
   customer?: Relation<CustomerEntity>;
@@ -94,11 +90,12 @@ export class OrderEntity extends AbstractEntity {
   generateOrderNumber() {
     if (!this.orderNumber) {
       const timestamp = Date.now();
-      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const random = Math.floor(Math.random() * 1000)
+        .toString()
+        .padStart(3, "0");
       this.orderNumber = `ORD-${timestamp}-${random}`;
     }
-    
-    
+    this.total = this.subtotal + this.tax + this.shipping;
   }
 
   constructor(data?: Partial<OrderEntity>) {

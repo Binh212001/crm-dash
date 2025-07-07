@@ -30,6 +30,9 @@ export class UserResponseDto {
   bio?: string;
 
   @Expose()
+  name: string;
+
+  @Expose()
   avatar?: any;
 
   @Type(()=>RoleResponseDto)

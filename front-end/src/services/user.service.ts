@@ -4,6 +4,7 @@ import type { Pagination } from '../types/pagination.type';
 export interface User {
   id: string;
   username: string;
+  name: string,
   firstName: string;
   lastName: string;
   email: string;
@@ -28,7 +29,7 @@ export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
   endpoints: (builder) => ({
-    getUsers: builder.query<{ data: User[]; pagination: Pagination }, UserParam | void>({
+    getUsers: builder.query<{ data: User[]; pagination: Pagination }, UserParam >({
       query: (params) => {
         if (params) {
           const searchParams = new URLSearchParams();

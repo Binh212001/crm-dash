@@ -19,7 +19,7 @@ import AddUser from "../pages/user/AddUser";
 import UpdateUser from "../pages/user/UpdateUser";
 import UpdateCustomer from "../pages/customers/UpdateCustomer";
 import UpdateProduct from "../pages/products/UpdateProduct";
-
+import OrderDetail from "../pages/orders/OrderDetail";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +43,7 @@ export const router = createBrowserRouter([
       { path: "update-user/:id", Component: UpdateUser },
       { path: "update-customer/:id", Component: UpdateCustomer },
       { path: "update-product/:id", Component: UpdateProduct },
+      { path: "order/detail/:id", Component: OrderDetail },
     ],
   },
   {

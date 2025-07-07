@@ -4,6 +4,7 @@ import { useGetProductsQuery } from "@/services/product.service";
 import { useGetCustomersQuery } from "@/services/customer.service";
 import Select from "@/components/Select";
 import { useCreateOrderMutation } from "@/services/order.service";
+import {  useGetUsersQuery } from "@/services/user.service";
 
 // This interface mirrors the CreateOrderItemDto from backend
 interface CreateOrderItemDto {
@@ -32,7 +33,8 @@ const AddOrder: React.FC = () => {
     limit: 100,
   });
   const { data: customers } = useGetCustomersQuery();
-  const { data: users } = useGetCustomersQuery();
+  const { data: users } = useGetUsersQuery({});
+
   const [productSelection, setProductSelection] = useState<string>("");
   const [createOrder] = useCreateOrderMutation();
 

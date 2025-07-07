@@ -96,7 +96,15 @@ export interface ListOrderDto {
   limit?: number;
   search?: string;
   status?: string;
-  customerId?: string;
+  createdAt?: string;
+}
+
+// OrderOverviewDto matches backend/src/api/order/dto/order-overview.dto.ts
+export interface OrderOverviewDto {
+  totalOrders: number;
+  completed: number;
+  pending: number;
+  totalRevenue: number;
 }
 
 export const orderApi = createApi({
@@ -111,7 +119,7 @@ export const orderApi = createApi({
         const searchParams = new URLSearchParams();
         if (params.search) searchParams.append("search", params.search);
         if (params.status) searchParams.append("status", params.status);
-        if (params.customerId) searchParams.append("customerId", params.customerId);
+        if (params.createdAt) searchParams.append("createdAt", params.createdAt);
         if (params.page !== undefined)
           searchParams.append("page", String(params.page));
         if (params.limit !== undefined)
@@ -172,6 +180,13 @@ export const orderApi = createApi({
         method: "DELETE",
       }),
     }),
+    // Add getOrderOverview endpoint
+    getOrderOverview: builder.query<OrderOverviewDto, void>({
+      query: () => ({
+        url: "orders/overview",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -183,4 +198,5 @@ export const {
   useUpdateOrderStatusMutation,
   useUpdatePaymentStatusMutation,
   useDeleteOrderMutation,
+  useGetOrderOverviewQuery,
 } = orderApi;

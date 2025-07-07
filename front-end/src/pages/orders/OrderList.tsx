@@ -1,48 +1,38 @@
-import React from "react";
-import OrderOverview from "./OrderOverview";
 import { useNavigate } from "react-router";
+import {
+  useGetOrdersQuery,
+  type OrderItemResponseDto,
+  type OrderResponseDto,
+} from "../../services/order.service";
+import OrderOverview from "./OrderOverview";
+import { useState } from "react";
 
 const OrderLists = () => {
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
-  const orders = [
-    {
-      id: "ORD-001",
-      customer: "John Doe",
-      products: ["Laptop Pro X1", "Wireless Mouse"],
-      total: 1329.98,
-      status: "completed",
-      date: "2024-01-20",
-      paymentMethod: "Credit Card",
-    },
-    {
-      id: "ORD-002",
-      customer: "Jane Smith",
-      products: ['Monitor 27"', "USB-C Cable"],
-      total: 315.98,
-      status: "processing",
-      date: "2024-01-21",
-      paymentMethod: "PayPal",
-    },
-    {
-      id: "ORD-003",
-      customer: "Mike Johnson",
-      products: ["Laptop Pro X1"],
-      total: 1299.99,
-      status: "pending",
-      date: "2024-01-22",
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      id: "ORD-004",
-      customer: "Sarah Wilson",
-      products: ["Wireless Mouse", "USB-C Cable"],
-      total: 45.98,
-      status: "cancelled",
-      date: "2024-01-19",
-      paymentMethod: "Credit Card",
-    },
-  ];
+  // Popup state for status change confirmation
+  const [statusPopup, setStatusPopup] = useState<{
+    open: boolean;
+    orderNumber?: string;
+    currentStatus?: string;
+    newStatus?: string;
+  }>({ open: false });
+
+  // Status filter state
+  const [statusFilter, setStatusFilter] = useState('');
+  // Date filter state
+  const [dateFilter, setDateFilter] = useState('');
+  const [search, setSearch] = useState('');
+
+  // Fetch orders from service
+  const { data, isLoading, isError } = useGetOrdersQuery({
+    page: 1,
+    limit: 20,
+    status: statusFilter,
+    createdAt: dateFilter,
+    search
+  });
+  const orders = data?.data || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -130,6 +120,27 @@ const OrderLists = () => {
     }
   };
 
+  // Handler for confirming status change
+  const handleConfirmStatusChange = () => {
+    // Here you would call your API to update the order status
+    // For now, just close the popup and show an alert
+    setStatusPopup({ open: false });
+    alert(
+      `Order status changed to: ${statusPopup.newStatus} (Order ID: ${statusPopup.orderNumber})`
+    );
+  };
+
+  // Handler for cancelling status change
+  const handleCancelStatusChange = () => {
+    setStatusPopup({ open: false });
+  };
+
+  // Handler for resetting filters
+  const handleResetFilter = () => {
+    setStatusFilter('');
+    setDateFilter('');
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Order Lists</h1>
@@ -156,16 +167,28 @@ const OrderLists = () => {
                   </svg>
                   Filter By
                 </button>
-                <select className="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
-                  <option>14 Feb 2019</option>
+                <input
+                  type="date"
+                  className="px-3 py-2 border border-gray-300 rounded text-sm bg-white"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  placeholder="Select date"
+                />
+                <select
+                  className="px-3 py-2 border border-gray-300 rounded text-sm bg-white"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">Order Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
-                <select className="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
-                  <option>Order Type</option>
-                </select>
-                <select className="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
-                  <option>Order Status</option>
-                </select>
-                <button className=" px-4 py-2 text-sm text-pink-600 bg-pink-50 border border-pink-200 rounded hover:bg-pink-100">
+                <button
+                  className=" px-4 py-2 text-sm text-pink-600 bg-pink-50 border border-pink-200 rounded hover:bg-pink-100"
+                  onClick={handleResetFilter}
+                >
                   Reset Filter
                 </button>
               </div>
@@ -173,6 +196,7 @@ const OrderLists = () => {
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <input
+                  onChange={(e)=>setSearch(e.target.value)}
                     type="text"
                     placeholder="Search orders..."
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -194,7 +218,7 @@ const OrderLists = () => {
                 </div>
                 <button
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
-                  onClick={()=> navigate('/add-order')}
+                  onClick={() => navigate("/add-order")}
                 >
                   New Order
                 </button>
@@ -203,93 +227,161 @@ const OrderLists = () => {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Products
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {order.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    <div className="max-w-xs">
-                      {order.products.map((product, index) => (
-                        <div key={index} className="truncate">
-                          {product}
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${order.total.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {getStatusIcon(order.status)}
-                      <span
-                        className={`ml-2 px-2 py-1 text-xs rounded-full ${getStatusColor(
-                          order.status
-                        )}`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.date}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.paymentMethod}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        View
-                      </button>
-                      <button className="text-green-600 hover:text-green-900">
-                        Edit
-                      </button>
-                      <button className="text-red-600 hover:text-red-900">
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+          {isLoading ? (
+            <div className="p-6 text-center text-gray-500">
+              Loading orders...
+            </div>
+          ) : isError ? (
+            <div className="p-6 text-center text-red-500">
+              Failed to load orders.
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Order ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Products
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Payment
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {orders.map((order: OrderResponseDto) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {order.orderNumber}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {order.customer?.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      <div className="max-w-xs">
+                        {order.items &&
+                          order.items.map(
+                            (item: OrderItemResponseDto, index: number) => (
+                              <div key={index} className="truncate">
+                                {item.product?.name}
+                              </div>
+                            )
+                          )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      ${order.total?.toFixed(2) ?? "0.00"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {getStatusIcon(order.status)}
+                        <span
+                          className={`ml-2 px-2 py-1 text-xs rounded-full ${getStatusColor(
+                            order.status
+                          )}`}
+                        >
+                          {order.status}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {/* Payment method is not available in API, so show N/A */}
+                      N/A
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => navigate(`/order/detail/${order.id}`)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          View
+                        </button>
+                        <select
+                          className="ml-2 px-2 py-1 border border-gray-300 rounded text-xs"
+                          value={order.status}
+                          onChange={(e) => {
+                            const newStatus = e.target.value;
+                            if (newStatus !== order.status) {
+                              setStatusPopup({
+                                open: true,
+                                orderNumber: order.orderNumber,
+                                currentStatus: order.status,
+                                newStatus,
+                              });
+                            }
+                          }}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
+
+      {/* Popup xác nhận thay đổi trạng thái */}
+      {statusPopup.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">
+              Xác nhận thay đổi trạng thái
+            </h2>
+            <p className="mb-4">
+              Bạn có chắc chắn muốn thay đổi trạng thái đơn hàng
+              <span className="font-bold mx-1">{statusPopup.orderNumber}</span>
+              từ
+              <span className="font-bold mx-1">
+                {statusPopup.currentStatus}
+              </span>
+              sang
+              <span className="font-bold mx-1">{statusPopup.newStatus}</span>?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+                onClick={handleCancelStatusChange}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                onClick={handleConfirmStatusChange}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
