@@ -3,12 +3,14 @@ import { BackgroundModule } from "@/background/background.module";
 import appConfig from "@/config/app.config";
 import { TypeOrmConfigService } from "@/database/typeorm-config.service";
 import { EventModule } from "@/events/event.module";
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { BullModule } from "@nestjs/bull";
+import { CacheModule } from "@nestjs/cache-manager";
 import { ModuleMetadata } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { ClsModule } from "nestjs-cls";
 import path from "path";
 import { DataSource, DataSourceOptions } from "typeorm";
 import {
@@ -16,9 +18,8 @@ import {
   initializeTransactionalContext,
   StorageDriver,
 } from "typeorm-transactional";
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
+import * as redisStore from 'cache-manager-ioredis';
 function generateModulesSet() {
   const imports: ModuleMetadata["imports"] = [
     ConfigModule.forRoot({
@@ -73,20 +74,27 @@ function generateModulesSet() {
     },
   });
 
-  const clsModule = ClsModule.forRootAsync({
-    global: true,
-    useFactory: () => ({
-      middleware: {
-        mount: true,
-        setup: (cls, req) => {
-          cls.set("origin", req.headers["origin"] ?? "http://localhost:3000");
-          cls.set("tenantId", req.headers["x-tenant-id"] ?? "root");
-        },
-      },
-    }),
+ 
+
+
+  const cacheModule = CacheModule.registerAsync({
+    imports: [ConfigModule],
+    useFactory: async (configService: ConfigService) => {
+      console.log("🚀 ~ useFactory: ~ configService:", configService.get('REDIS_HOST'))
+      return {
+        store: redisStore,
+        host: configService.get('REDIS_HOST', 'localhost'),
+        port: configService.get('REDIS_PORT', 8002),
+        password: configService.get('REDIS_PASSWORD', 'redispass'),
+        db: 0,
+        tls: false
+      };
+    },
+    isGlobal: true,
+    inject: [ConfigService],
   });
 
-  const customModules = [clsModule, dbModule, redisModule, ApiModule , EventModule];
+  const customModules = [cacheModule, dbModule, redisModule, ApiModule , EventModule];
 
   return imports.concat(customModules);
 }

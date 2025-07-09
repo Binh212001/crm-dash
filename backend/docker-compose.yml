@@ -60,75 +60,9 @@ services:
     networks:
       - crm-backend-network
 
-  # elasticsearch:
-  #   image: elasticsearch_with_analysis_vietnamese
-  #   container_name: elasticsearch
-  #   restart: always
-  #   env_file:
-  #     - .env
-  #   build:
-  #     context: .
-  #     dockerfile: elastic-search.Dockerfile
-  #     args:
-  #       ES_VERSION: ${ES_VERSION}
-
-  #   volumes:
-  #     - es_data:/usr/share/elasticsearch/data
-  #   ports:
-  #     - ${ES_PORT}:9200
-  #   environment:
-  #     - node.name=es-master
-  #     - cluster.name=${ES_CLUSTER_NAME}
-  #     - discovery.type=single-node
-  #     - ELASTIC_PASSWORD=${ES_PASSWORD}
-  #     - bootstrap.memory_lock=true
-  #   mem_limit: 2g # Limit memory usage to 2GB
-  #   ulimits:
-  #     memlock:
-  #       soft: -1
-  #       hard: -1
-  #   networks:
-  #     - crm-backend-network
-
-  # pgsync:
-  #   build:
-  #     context: .
-  #     dockerfile: pgsync.Dockerfile
-  #     args:
-  #       WORKDIR: /pgsync
-  #   command: ../entrypoint/runserver.sh
-  #   container_name: pgsync
-  #   restart: always
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - PG_USER=${DATABASE_USERNAME_ROOT}
-  #     - PG_HOST=db
-  #     - PG_PORT=5432
-  #     - PG_PASSWORD=${DATABASE_PASSWORD_ROOT}
-  #     - LOG_LEVEL=INFO
-  #     - ELASTICSEARCH_PORT=9200
-  #     - ELASTICSEARCH_SCHEME=http
-  #     - ELASTICSEARCH_HOST=elasticsearch
-  #     - ELASTICSEARCH_USER=elastic
-  #     - ELASTICSEARCH_PASSWORD=${ES_PASSWORD}
-  #     - REDIS_HOST=redissass
-  #     - REDIS_PORT=6379
-  #     - REDIS_AUTH=${REDIS_PASSWORD}
-  #   volumes:
-  #     - ./data/pgsync/workdir:/pgsync
-  #   depends_on:
-  #     - elasticsearch
-  #   networks:
-  #     - vmaster-backend_vmaster-backend-network
-  #     - crm-backend-network
-  #   mem_limit: 512m
-
 volumes:
   postgres_data:
-  # pgadmin_data:
   redis_data:
-  # es_data:
 
 networks:
   crm-backend-network:

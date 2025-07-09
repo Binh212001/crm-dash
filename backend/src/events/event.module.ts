@@ -12,6 +12,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       verboseMemoryLeak: false,
       ignoreErrors: false,
     }),
+    
    
   ],
 })
