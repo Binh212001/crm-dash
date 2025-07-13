@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { Pagination } from "../types/pagination.type";
+import { setAuthHeader } from "./api";
 
 // ProductResponseDto matches backend/src/api/product/dto/product-response.ts
 export interface ProductResponseDto {
@@ -61,7 +62,11 @@ export interface ProductParam {
 
 export const productApi = createApi({
   reducerPath: "productApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8000/"  ,
+    prepareHeaders: (headers) => {
+      return setAuthHeader(headers);
+    },
+  }),
   endpoints: (builder) => ({
     getProducts: builder.query<
       { data: ProductResponseDto[]; pagination: Pagination },

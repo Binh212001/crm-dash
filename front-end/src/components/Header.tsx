@@ -1,7 +1,35 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Dropdown from './Dropdown';
 
+const API_BASE_URL = 'http://localhost:8000';
+
 function Header() {
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      // Optionally, you can send the access token in the Authorization header if needed
+      const accessToken = localStorage.getItem('accessToken');
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+      });
+    } catch (err) {
+      // Optionally handle error
+    } finally {
+      // Remove tokens and user info from localStorage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      // Redirect to login page
+      navigate('/auth/login');
+    }
+  };
+
   return (
     <header className="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
       <div className="flex items-center space-x-3">
@@ -139,7 +167,10 @@ function Header() {
             Settings
           </div>
           <div className="border-t border-gray-100">
-            <div className="px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer">
+            <div
+              className="px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
+              onClick={handleSignOut}
+            >
               Sign out
             </div>
           </div>

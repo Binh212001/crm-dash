@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { Pagination } from '../types/pagination.type';
+import { setAuthHeader } from './api';
 
 export interface Category {
   id: string;
@@ -18,7 +19,12 @@ export interface CategoryParam {
 
 export const categoryApi = createApi({
   reducerPath: 'categoryApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: 'http://localhost:8000/',
+    prepareHeaders: (headers) => {
+      return setAuthHeader(headers);
+    },
+  }),
   endpoints: (builder) => ({
     getCategories: builder.query<{ data: Category[]; pagination: Pagination }, CategoryParam | void>({
       query: (params) => {

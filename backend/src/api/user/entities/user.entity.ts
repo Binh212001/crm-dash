@@ -26,11 +26,7 @@ export class UserEntity extends AbstractEntity {
     length: 50,
     nullable: true,
   })
-  @Index('UQ_user_username', {
-    where: '"deleted_at" IS NULL',
-    unique: true,
-  })
-  username: string;
+
 
   @Column({
     length: 100,

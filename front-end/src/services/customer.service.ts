@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { Pagination } from '../types/pagination.type';
+import { setAuthHeader } from './api';
 
 export interface Customer {
   id: string;
@@ -21,7 +22,11 @@ export interface Customer {
 
 export const customerApi = createApi({
   reducerPath: 'customerApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' ,
+    prepareHeaders: (headers) => {
+      return setAuthHeader(headers);
+    },
+   }),
   endpoints: (builder) => ({
     getCustomers: builder.query<{ data: Customer[]; pagination: Pagination }, void>({
       query: () => 'customer',

@@ -33,6 +33,4 @@ export class RoomEntity extends AbstractEntity {
     this.id = v7();
     Object.assign(this, data);
   }
-
-
 }

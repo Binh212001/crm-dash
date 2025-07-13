@@ -25,8 +25,7 @@ import {
     title: string;
     @StringFieldOptional()
     address: string;
-    @StringFieldOptional()
-    username: string;
+  
     @StringFieldOptional()
     password: string;
     @StringFieldOptional()

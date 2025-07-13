@@ -11,6 +11,7 @@ import { OrderModule } from './order/order.module';
 import { SettingModule } from "./settings/setting.module";
 import { RoomsModule } from "./rooms/rooms.module";
 import { ChatsModule } from "./chats/chats.module";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { ChatsModule } from "./chats/chats.module";
     OrderModule,
     SettingModule,
     RoomsModule,
-    ChatsModule
+    ChatsModule,
+    AuthModule
   ],
 })
 export class ApiModule {}

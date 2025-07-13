@@ -13,12 +13,4 @@ export class SignUpDto {
   @StringField()
   lastName: string;
 
-  @UserNameField()
-  username: string;
-
-  @StringFieldOptional()
-  phoneNumber?: string;
-
-  @StringFieldOptional()
-  address?: string;
 }

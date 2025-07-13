@@ -4,13 +4,15 @@ import { UserService } from '../../user/user.service';
 import { LoginDto } from '../dto/login.dto';
 import { SignUpDto } from '../dto/signup.dto';
 import { AuthResponseDto } from '../dto/auth-response.dto';
-import * as bcrypt from 'bcrypt';
+import { UserRepository } from '@/api/user/user.repository';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -18,15 +20,20 @@ export class AuthService {
 
     // Find user by email
     const user = await this.userService.findByEmail(email);
+    console.log("🚀 ~ AuthService ~ login ~ user:", user)
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Use argon2 for password comparison instead of bcrypt
+    const isPasswordValid = await argon2.verify(user.password, password);
+    console.log("🚀 ~ AuthService ~ login ~ isPasswordValid:", isPasswordValid)
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+
 
     // Generate tokens
     const accessToken = this.jwtService.generateAccessToken({
@@ -54,7 +61,7 @@ export class AuthService {
   }
 
   async signUp(dto: SignUpDto): Promise<AuthResponseDto> {
-    const { email, password, firstName, lastName , username } = dto;
+    const { email, password, firstName, lastName ,  } = dto;
 
     // Check if user already exists
     const existingUser = await this.userService.findByEmail(email);
@@ -62,18 +69,14 @@ export class AuthService {
       throw new BadRequestException('User with this email already exists');
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const user = await this.userService.create({
+  // Create user
+    const user = await this.userRepository.save(this.userRepository.create({
       email,
-      password: hashedPassword,
+      password,
       firstName,
       lastName,
-      username
-    });
-
+    }))
     // Generate tokens
     const accessToken = this.jwtService.generateAccessToken({
       sub: user.id,

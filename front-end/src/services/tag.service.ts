@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { Pagination } from '../types/pagination.type';
+import { setAuthHeader } from './api';
 
 // Tag interface matches backend Tag entity/dto
 export interface Tag {
@@ -28,7 +29,11 @@ export interface TagParam {
 
 export const tagApi = createApi({
   reducerPath: 'tagApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' ,
+    prepareHeaders: (headers) => {
+      return setAuthHeader(headers);
+    },
+   }),
   endpoints: (builder) => ({
     getTags: builder.query<{ data: Tag[]; pagination: Pagination }, TagParam | void>({
       query: (params) => {

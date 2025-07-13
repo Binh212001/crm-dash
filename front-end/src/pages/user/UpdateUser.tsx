@@ -10,10 +10,9 @@ const UpdateUser = () => {
   // Fetch the user data for the given id
   const { data: user, isLoading: isUserLoading } = useGetUserQuery(id || "");
   console.log("🚀 ~ UpdateUser ~ user:", user)
-  const { refetch } = useGetUsersQuery();
+  const { refetch } = useGetUsersQuery({});
 
   const [form, setForm] = useState({
-    username: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -31,7 +30,6 @@ const UpdateUser = () => {
   useEffect(() => {
     if (user) {
       setForm({
-        username: user.username || "",
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
@@ -79,7 +77,6 @@ const UpdateUser = () => {
       await updateUser({
         id,
         data: {
-          username: form.username,
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
@@ -118,14 +115,7 @@ const UpdateUser = () => {
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputText
-              label="Username"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              required
-              placeholder="Username"
-            />
+           
             <InputText
               label="First Name"
               name="firstName"

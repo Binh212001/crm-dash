@@ -14,6 +14,9 @@ import { ValidationError } from "class-validator";
 import path from "path";
 import * as express from "express";
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { AuthGuard } from "./guards/auth.graud";
+import { JwtService } from "./api/auth/services/jwt.service";
+import { UserService } from "./api/user/user.service";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector);
@@ -63,6 +66,9 @@ async function bootstrap() {
   });
   app.use(json({ limit: "500kb" }));
 
+  app.useGlobalGuards(
+    new AuthGuard(reflector, app.get(JwtService), app.get(UserService))
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

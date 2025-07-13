@@ -8,9 +8,7 @@ import {
 } from '@/decorators/field.decorators';
 
 export class CreateUserDto {
-  @UserNameField()
-  username: string;
-
+ 
   @StringField({ minLength: 1, maxLength: 100 })
   firstName: string;
 

@@ -5,7 +5,6 @@ import InputText from "../../components/InputText";
 
 const AddUser = () => {
   const [form, setForm] = useState({
-    username: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -17,7 +16,7 @@ const AddUser = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [createUser, { isLoading }] = useCreateUserMutation();
-  const {refetch} = useGetUsersQuery();
+  const {refetch} = useGetUsersQuery({});
   
 
   const navigate = useNavigate();
@@ -51,7 +50,6 @@ const AddUser = () => {
     setError(null);
     try {
       await createUser({
-        username: form.username,
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
@@ -81,14 +79,7 @@ const AddUser = () => {
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputText
-              label="Username"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              required
-              placeholder="Username"
-            />
+         
             <InputText
               label="First Name"
               name="firstName"
