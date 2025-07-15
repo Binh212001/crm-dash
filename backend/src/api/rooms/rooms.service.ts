@@ -3,28 +3,30 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { RoomRepository } from './room.repository';
 import { RoomEntity } from './entities/room.entity';
 import { UserEntity } from '@/api/user/entities/user.entity';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class RoomsService {
 
     constructor(
         private readonly roomRepository: RoomRepository,
+        private readonly userRepository: UserRepository,
     ) { }
 
     async create(userId: string, createRoomDto: CreateRoomDto): Promise<RoomEntity> {
-        // Ensure the creator is included in the members list
-        if (!createRoomDto.members.includes(userId)) {
-            createRoomDto.members.push(userId);
+        // Find the user by id
+        const defaultUser = await this.userRepository.findOne({
+            where: { id: userId }
+        });
+
+        if (!defaultUser) {
+            throw new Error('User not found');
         }
 
-        // Create RoomEntity instance
+        // Ensure the creator is added to the members array
         const room = this.roomRepository.create({
             ...createRoomDto,
-            members: createRoomDto.members.map(id => {
-                const user = new UserEntity();
-                user.id = id;
-                return user;
-            }),
+            members: [defaultUser]
         });
 
         return await this.roomRepository.save(room);

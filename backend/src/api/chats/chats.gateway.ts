@@ -1,42 +1,53 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, ConnectedSocket, OnGatewayInit } from '@nestjs/websockets';
-import { ChatsService } from './chats.service';
-import { CreateChatDto } from './dto/create-chat.dto';
+import { ConfigService } from '@nestjs/config';
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
-// import { WsJwtAuthGuard } from 'src/config/guard/ws-jwt-auth.guard';
 
-@WebSocketGateway({
-  port: 800,
-  namespace: '/chats',
+@WebSocketGateway(
+  3000,
+  {
+
+  cors: {
+    origin: '*',
+  },
 })
-export class ChatsGateway implements OnGatewayInit {
-
-  constructor(private readonly chatsService: ChatsService) {}
-
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
+  constructor(
+  ) {}
+
   afterInit(server: Server) {
-    // server.use(wsAuthMiddleware);
+    console.log('WebSocket server initialized');
   }
 
-  @SubscribeMessage('create')
-  async handleCreate(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() createChatDto: CreateChatDto
-  ) {
-    // Fix: Use correct type assertion to access user on handshake
-    const handshake: any = client.handshake;
-    const senderId = handshake?.user?._id?.toString();
-    if (!senderId) {
-      client.emit('error', { message: 'Unauthorized' });
-      return;
-    }
-    try {
-      const chat = await this.chatsService.create(senderId, createChatDto);
-      this.server.emit('new-chat', chat);
-    } catch (error) {
-      client.emit('error', { message: error?.message || 'Failed to create chat' });
-    }
+  handleConnection(client: Socket, ...args: any[]) {
+    console.log(`Client connected: ${client.id}`);
+    client.emit('events', { message: 'Welcome! You are connected.' });
+  }
+
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected: ${client.id}`);
+  }
+
+  @SubscribeMessage('events')
+  handleEvents(@MessageBody() data: any, @ConnectedSocket() client: Socket): void {
+    console.log("🚀 ~ ChatGateway ~ handleEvents ~ data.message :", data.message )
+    client.broadcast.emit('events', { message: data.message });
+    client.emit('events', { message: data.message });
+  }
+
+  @SubscribeMessage('identity')
+  async identity(@MessageBody() data: number): Promise<number> {
+    return data;
   }
 }

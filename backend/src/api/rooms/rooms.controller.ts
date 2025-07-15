@@ -6,6 +6,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { RoomsService } from './rooms.service';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { UserResponseDto } from '../user/dto/user-response.dto';
+import { ListBaseReqDto } from '../base/dto/list-base.req.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -33,8 +34,8 @@ export class RoomsController {
   @ApiParam({ name: 'id', required: true })
   getChats(
     @Param('id') id: string,
-    @Query() dto: GetChatDto
+    @Query() dto: ListBaseReqDto
   ) {
-    return this.chatsService.findAll(id, new GetChatDto(dto));
+    return this.chatsService.findAll(id , dto);
   }
 }

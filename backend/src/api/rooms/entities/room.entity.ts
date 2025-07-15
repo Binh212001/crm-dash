@@ -12,6 +12,9 @@ export class RoomEntity extends AbstractEntity {
 
   @Column({ length: 255, nullable: true })
   name: string;
+  
+  @Column({ nullable: true })
+  description: string;
 
   @Column({
     type: 'enum',

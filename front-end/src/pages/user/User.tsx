@@ -5,14 +5,11 @@ import { useDeleteUserMutation } from "../../services/user.service";
 
 const UserList = () => {
   const [search, setSearch] = useState("");
-  const { data, isLoading, refetch } = useGetUsersQuery(
-    search ? { q: search } : undefined
-  );
+  const { data, isLoading, refetch } = useGetUsersQuery( { q: search });
   const users = data?.data || [];
 
   const navigate = useNavigate();
 
-  // Delete user by id using the mutation from user.service.ts
   const [deleteUser] = useDeleteUserMutation();
 
   const handleDeleteUser = async (id: string) => {
@@ -62,7 +59,6 @@ const UserList = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-700 text-sm">
-                <th className="px-4 py-3 text-left font-medium">Username</th>
                 <th className="px-4 py-3 text-left font-medium">First Name</th>
                 <th className="px-4 py-3 text-left font-medium">Last Name</th>
                 <th className="px-4 py-3 text-left font-medium">Email</th>
@@ -84,7 +80,6 @@ const UserList = () => {
                     key={user.id}
                     className="border-b border-gray-100 hover:bg-gray-50"
                   >
-                    <td className="px-4 py-3 text-gray-800">{user.username}</td>
                     <td className="px-4 py-3 text-gray-700">
                       {user.firstName}
                     </td>

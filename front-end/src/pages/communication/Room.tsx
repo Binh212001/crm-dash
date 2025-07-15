@@ -1,145 +1,74 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
-
-// This would be replaced by a real API call to fetch room messages
-async function fetchRoomMessages(roomId: string): Promise<Message[]> {
-  // Simulate API call
-  return [
-    {
-      id: "1",
-      sender: "John Doe",
-      content: "Hey there! How's it going?",
-      timestamp: "2024-06-10T10:00:00Z",
-    },
-    {
-      id: "2",
-      sender: "Jane Smith",
-      content: "All good! Working on the new project.",
-      timestamp: "2024-06-10T10:01:00Z",
-    },
-    {
-      id: "3",
-      sender: "John Doe",
-      content: "Awesome! Let me know if you need any help.",
-      timestamp: "2024-06-10T10:02:00Z",
-    },
-  ];
-}
-
-// This would be replaced by a real API call to send a message
-async function sendRoomMessage(roomId: string, message: Omit<Message, "id" | "timestamp">): Promise<Message> {
-  // Simulate API call and return the message with id and timestamp
-  return {
-    ...message,
-    id: Math.random().toString(36).slice(2),
-    timestamp: new Date().toISOString(),
-  };
-}
-
-interface Message {
-  id: string;
-  sender: string;
-  content: string;
-  timestamp: string;
-}
+import React, { useEffect, useState, useRef } from "react";
+import { io, Socket } from "socket.io-client";
 
 const Room: React.FC = () => {
-  const { id: roomId } = useParams<{ id: string }>();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [message, setMessage] = useState("");
+  const [receivedMessage, setReceivedMessage] = useState<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    if (roomId) {
-      fetchRoomMessages(roomId).then((msgs) => {
-        if (mounted) {
-          setMessages(msgs);
-          setLoading(false);
-        }
-      });
-    }
+    const socket = io('http://localhost:3000');
+    socketRef.current = socket;
+
+    socket.on('connect', () => {
+      console.log('Connected');
+
+      socket.emit('events', { message: 'Xin chapo ban' });
+    
+    });
+
+    socket.on('events', (data: any) => {
+      console.log('event', data);
+      if (data && data.message) {
+        setReceivedMessage(data.message);
+      }
+    });
+
+    socket.on('exception', (data: any) => {
+      console.log('exception', data);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected');
+    });
+
     return () => {
-      mounted = false;
+      socket.disconnect();
     };
-  }, [roomId]);
+  }, []);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !roomId) return;
-    setSending(true);
-    const newMessage: Omit<Message, "id" | "timestamp"> = {
-      sender: "You",
-      content: input,
-    };
-    try {
-      const sent = await sendRoomMessage(roomId, newMessage);
-      setMessages((prev) => [...prev, sent]);
-      setInput("");
-    } finally {
-      setSending(false);
+    if (message.trim() && socketRef.current) {
+      console.log("Sending message:", message);
+      socketRef.current.emit("events", { message });
+      setMessage("");
     }
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[80vh] bg-white rounded-lg shadow p-4">
-      <div className="border-b pb-3 mb-3">
-        <h1 className="text-2xl font-bold">Room {roomId}</h1>
-        <p className="text-gray-500 text-sm">Chat with your team in real time</p>
-      </div>
-      <div className="flex-1 overflow-y-auto space-y-4 px-1">
-        {loading ? (
-          <div className="text-center text-gray-400 mt-8">Loading messages...</div>
-        ) : (
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.sender === "You" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-xs px-4 py-2 rounded-lg shadow-sm ${
-                  msg.sender === "You"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-900"
-                }`}
-              >
-                <div className="text-xs font-semibold mb-1">
-                  {msg.sender}
-                  <span className="ml-2 text-[10px] text-gray-400">
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-                <div>{msg.content}</div>
-              </div>
-            </div>
-          ))
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-      <form onSubmit={handleSend} className="mt-4 flex gap-2">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <h1 className="text-2xl font-bold mb-4">Chat Room</h1>
+      <form onSubmit={handleSend} className="flex gap-2 mb-4">
         <input
+          className="border rounded px-2 py-1"
           type="text"
-          className="flex-1 border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={sending}
         />
         <button
+          className="bg-blue-500 text-white px-4 py-1 rounded"
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          disabled={sending}
         >
-          {sending ? "Sending..." : "Send"}
+          Send
         </button>
       </form>
+      {receivedMessage && (
+        <div className="bg-white border rounded p-4 shadow">
+          <span className="font-semibold">Received:</span> {receivedMessage}
+        </div>
+      )}
     </div>
   );
 };

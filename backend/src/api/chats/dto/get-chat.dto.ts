@@ -1,14 +1,18 @@
-import { StringFieldOptional, NumberFieldOptional } from '@/decorators/field.decorators';
+import { Expose, Type } from 'class-transformer';
+import { ChatEntity } from '../entities/chat.entity';
+import { UserResponseDto } from '@/api/user/dto/user-response.dto';
 
 export class GetChatDto {
+  @Expose()
+  id: string;
 
-    @StringFieldOptional()
-    readonly last_id?: string;
+  @Expose()
+  content: string;
 
-    @NumberFieldOptional({ default: 10 })
-    readonly limit?: number = 10;
+  @Expose()
+  @Type(() => UserResponseDto)
+  sender: UserResponseDto;
 
-    constructor(data: Partial<GetChatDto>) {
-        Object.assign(this, data);
-    }
+  @Expose()
+  createdAt: Date;
 }

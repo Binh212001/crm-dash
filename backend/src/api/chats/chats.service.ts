@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { GetChatDto } from './dto/get-chat.dto';
 import { ChatRepository } from './chat.repository';
+import { ListBaseReqDto } from '../base/dto/list-base.req.dto';
+import { paginate } from '@/utils/offset-pagination';
+import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ChatsService {
@@ -20,20 +24,24 @@ export class ChatsService {
     return this.chatRepository.save(chat);
   }
 
-  async findAll(roomId: string, getChatDto: GetChatDto) {
-    const query: any = {
-      roomId,
-    };
+  async findAll(roomId: string, dto: ListBaseReqDto) {
+    const query = this.chatRepository
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.sender', 'sender')
+      .where('chat.room = :roomId', { roomId })
+      .orderBy('chat.createdAt', 'ASC');
 
-    if (getChatDto.last_id) {
-      query.id = { $lt: getChatDto.last_id };
-    }
-
-    // Assuming the repository supports find with options
-    return this.chatRepository.find({
-      where: query,
-      order: { createdAt: 'DESC' },
-      take: getChatDto.limit,
+    const [base, metaDto] = await paginate(query, dto, {
+      skipCount: false,
+      takeAll: false,
     });
+
+    return new OffsetPaginatedDto(
+      plainToInstance(GetChatDto, base, {
+        excludeExtraneousValues: true,
+      }),
+      metaDto
+    );
   }
+  
 }

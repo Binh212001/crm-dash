@@ -92,6 +92,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document); // Swagger UI sẽ chạy tại /api
   app.use("/public", express.static(path.join(__dirname, "public")));
+  
+  // Serve Socket.IO client library
+  app.use('/socket.io', express.static(path.join(__dirname, '../node_modules/socket.io/client-dist')));
+  
   await app.listen(
     configService.getOrThrow("app.port", { infer: true }),
     () => {
