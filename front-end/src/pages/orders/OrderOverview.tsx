@@ -1,10 +1,6 @@
 import React from "react";
-import { useGetOrderOverviewQuery } from "../../services/order.service";
 
 function OrderOverview() {
-  const { data, isLoading, isError } = useGetOrderOverviewQuery();
-  console.log("🚀 ~ OrderOverview ~ data:", data)
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div className="bg-white rounded-lg shadow p-4">
@@ -26,13 +22,7 @@ function OrderOverview() {
           </div>
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600">Total Orders</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {isLoading
-                ? "..."
-                : isError
-                ? "-"
-                : data?.totalOrders ?? 0}
-            </p>
+            <p className="text-2xl font-semibold text-gray-900">0</p>
           </div>
         </div>
       </div>
@@ -56,13 +46,7 @@ function OrderOverview() {
           </div>
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600">Completed</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {isLoading
-                ? "..."
-                : isError
-                ? "-"
-                : data?.completed ?? 0}
-            </p>
+            <p className="text-2xl font-semibold text-gray-900">0</p>
           </div>
         </div>
       </div>
@@ -86,13 +70,7 @@ function OrderOverview() {
           </div>
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600">Pending</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {isLoading
-                ? "..."
-                : isError
-                ? "-"
-                : data?.pending ?? 0}
-            </p>
+            <p className="text-2xl font-semibold text-gray-900">0</p>
           </div>
         </div>
       </div>
@@ -116,16 +94,7 @@ function OrderOverview() {
           </div>
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {isLoading
-                ? "..."
-                : isError
-                ? "-"
-                : data?.totalRevenue?.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  }) ?? "$0"}
-            </p>
+            <p className="text-2xl font-semibold text-gray-900">$0</p>
           </div>
         </div>
       </div>

@@ -1,32 +1,54 @@
-import { useNavigate } from "react-router";
+import { useAppDispatch, useAppSelector } from "@/app/hook";
 import {
-  useDeleteCustomerMutation,
-  useGetCustomersQuery,
-} from "../../services/customer.service";
+  deleteCustomer,
+  getCustomers,
+  type Customer,
+} from "@/services/customer/customer.action";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 const CustomerList = () => {
-  const { data, isLoading, refetch } = useGetCustomersQuery();
-  const [deleteCustomerMutation] = useDeleteCustomerMutation();
+  const [search, setSearch] = useState("");
+  const [pageParams, setPageParams] = useState<{ page: number; limit: number }>(
+    {
+      page: 1,
+      limit: 10,
+    }
+  );
   const navigate = useNavigate();
 
-  const customers = data?.data || [];
+  const { customers, pagination, loading } = useAppSelector(
+    (state) => state.customers
+  );
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(
+      getCustomers({
+        q: search,
+        ...pageParams,
+      })
     );
-  }
+  }, [search, pageParams.page, pageParams.limit, dispatch]);
 
-  const deleteCustomer = async (id: string) => {
-    try {
-      console.log("🚀 ~ deleteCustomer ~ id:", id);
-      await deleteCustomerMutation(id).unwrap();
-      refetch();
-    } catch (error) {
-      // Optionally, handle error (e.g., show error message)
-      console.error("Failed to delete customer:", error);
+  const handlePageChange = (newPage: number) => {
+    setPageParams((prev) => ({
+      ...prev,
+      page: newPage,
+    }));
+  };
+
+  const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPageParams({
+      page: 1,
+      limit: Number(e.target.value),
+    });
+  };
+
+  const handleDelete = (id: string | undefined) => {
+    if (id) {
+      dispatch(deleteCustomer(id));
     }
   };
 
@@ -36,24 +58,16 @@ const CustomerList = () => {
         <div className="px-6 pt-4 pb-2 flex items-center justify-between border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-800">Customer List</h2>
           <div className="flex items-center gap-4">
-            <select
-              className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
-              style={{ minWidth: 150 }}
-            >
-              <option value="">All Cities</option>
-              <option value="new-york">New York</option>
-              <option value="los-angeles">Los Angeles</option>
-              <option value="chicago">Chicago</option>
-            </select>
             <input
               type="text"
               placeholder="Search customer name"
               className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
               style={{ minWidth: 220 }}
+              onChange={(e) => setSearch(e.target.value)}
             />
             <button
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
               onClick={() => navigate("/add-customer")}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
             >
               New Customer
             </button>
@@ -74,97 +88,100 @@ const CustomerList = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {customers.map((customer) => (
-                <tr
-                  key={customer.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition"
-                >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                        {customer.avatar ? (
-                          <img
-                            src={customer.avatar}
-                            alt={customer.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-gray-500 text-sm font-medium">
-                            {customer.name?.charAt(0)}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-medium text-gray-800">
-                        {customer.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{customer.email}</td>
-                  <td className="px-4 py-3 text-gray-700">{customer.orders}</td>
-                  <td className="px-4 py-3 font-semibold text-gray-900">
-                    ${Number(customer.totalSpent).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {customer.city || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {customer.lastSeen
-                      ? new Date(customer.lastSeen).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {customer.lastOrder
-                      ? new Date(customer.lastOrder).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex space-x-2">
-                      <button
-                        className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
-                        title="Edit"
-                        onClick={() =>
-                          navigate("/update-customer/" + customer.id)
-                        }
-                      >
-                        <svg
-                          className="w-4 h-4 text-blue-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-red-50 transition"
-                        title="Delete"
-                        onClick={() => deleteCustomer(customer.id)}
-                      >
-                        <svg
-                          className="w-4 h-4 text-red-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="text-center py-8 text-gray-400">
+                    Loading...
                   </td>
                 </tr>
-              ))}
+              ) : customers && customers.length > 0 ? (
+                customers.map((customer: Customer) => (
+                  <tr key={customer.id} className="border-b last:border-b-0">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-800">
+                        {customer.name}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">{customer.email}</td>
+                    <td className="px-4 py-3">{customer.ordersCount ?? "-"}</td>
+                    <td className="px-4 py-3">
+                      {customer.totalSpent ? `$${customer.totalSpent}` : "-"}
+                    </td>
+                    <td className="px-4 py-3">{customer.city || "-"}</td>
+                    <td className="px-4 py-3">
+                      {customer.lastSeen
+                        ? new Date(customer.lastSeen).toLocaleString()
+                        : "-"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {customer.lastOrder
+                        ? new Date(customer.lastOrder).toLocaleString()
+                        : "-"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button className="text-blue-600 hover:underline text-sm mr-2">
+                        Edit
+                      </button>
+                      <button
+                        className="text-red-600 hover:underline text-sm"
+                        onClick={() => handleDelete(customer.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="text-center py-8 text-gray-400">
+                    No customers found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
+        </div>
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+          <div>
+            <span className="text-sm text-gray-600">
+              Page {pagination?.currentPage || 1} of{" "}
+              {pagination?.totalPages || 1}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() =>
+                handlePageChange((pagination?.currentPage || 1) - 1)
+              }
+              disabled={!pagination || pagination.currentPage <= 1}
+            >
+              Previous
+            </button>
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() =>
+                handlePageChange((pagination?.currentPage || 1) + 1)
+              }
+              disabled={
+                !pagination || pagination.currentPage >= pagination.totalPages
+              }
+            >
+              Next
+            </button>
+            <select
+              className="ml-2 px-2 py-1 border rounded text-sm"
+              value={pageParams.limit}
+              onChange={handleLimitChange}
+            >
+              {[10, 20, 50, 100].map((size) => (
+                <option key={size} value={size}>
+                  {size} / page
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
     </div>

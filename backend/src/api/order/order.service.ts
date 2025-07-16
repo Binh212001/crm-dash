@@ -8,11 +8,7 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { ListOrderDto } from "./dto/list-order.dto";
 import { OrderResponseDto } from "./dto/order-response.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
-import {
-  OrderEntity,
-  OrderStatus,
-  PaymentStatus,
-} from "./entities/order.entity";
+import { OrderEntity, OrderStatus } from "./entities/order.entity";
 import { OrderItemRepository } from "./repositories/order-item.repository";
 import { OrderRepository } from "./repositories/order.repository";
 import { DeleteBaseResDto } from "../base/dto/delete-base.res.dto";

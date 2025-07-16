@@ -1,37 +1,64 @@
 import React, { useState } from "react";
-import { useGetUsersQuery } from "../../services/user.service";
 import { useNavigate } from "react-router";
-import { useDeleteUserMutation } from "../../services/user.service";
+
+// Mock data based on backend/src/api/user/dto/user-response.dto.ts
+const mockUsers = [
+  {
+    id: "1",
+    firstName: "Alice",
+    lastName: "Smith",
+    email: "alice@example.com",
+    phoneNumber: "1234567890",
+    address: "123 Main St",
+    dateOfBirth: "1990-01-01",
+    bio: "Frontend developer",
+    name: "Alice Smith",
+    avatar: null,
+    role: { id: "r1", name: "Admin" },
+    createdAt: "2024-06-01T10:00:00Z",
+    updatedAt: "2024-06-05T12:00:00Z",
+  },
+  {
+    id: "2",
+    firstName: "Bob",
+    lastName: "Johnson",
+    email: "bob@example.com",
+    phoneNumber: "0987654321",
+    address: "456 Elm St",
+    dateOfBirth: "1985-05-15",
+    bio: "Backend developer",
+    name: "Bob Johnson",
+    avatar: null,
+    role: { id: "r2", name: "User" },
+    createdAt: "2024-06-02T11:00:00Z",
+    updatedAt: "2024-06-06T14:00:00Z",
+  },
+];
 
 const UserList = () => {
+  const [users, setUsers] = useState(mockUsers);
   const [search, setSearch] = useState("");
-  const { data, isLoading, refetch } = useGetUsersQuery( { q: search });
-  const users = data?.data || [];
-
   const navigate = useNavigate();
 
-  const [deleteUser] = useDeleteUserMutation();
-
-  const handleDeleteUser = async (id: string) => {
-    try {
-      await deleteUser(id).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to delete user:", error);
+  const searchUser = (value: string) => {
+    setSearch(value);
+    if (!value) {
+      setUsers(mockUsers);
+    } else {
+      setUsers(
+        mockUsers.filter(
+          (user) =>
+            user.firstName.toLowerCase().includes(value.toLowerCase()) ||
+            user.lastName.toLowerCase().includes(value.toLowerCase()) ||
+            user.email.toLowerCase().includes(value.toLowerCase())
+        )
+      );
     }
   };
 
-  const searchUser = (key: string) => {
-    setSearch(key);
+  const handleDeleteUser = (id: string) => {
+    setUsers((prev) => prev.filter((user) => user.id !== id));
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -39,14 +66,14 @@ const UserList = () => {
         <div className="px-6 pt-4 pb-2 flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-100 gap-4">
           <h2 className="text-lg font-semibold text-gray-800">User List</h2>
           <div className="flex flex-col md:flex-row md:items-center gap-2">
-              <input
-                type="text"
-                className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
-                placeholder="Search by username, email, etc."
-                value={search}
-                onChange={(e) => searchUser(e.target.value)}
-              />
-             
+            <input
+              type="text"
+              className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
+              placeholder="Search by username, email, etc."
+              value={search}
+              onChange={(e) => searchUser(e.target.value)}
+            />
+
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
               onClick={() => navigate("/add-user")}
@@ -100,7 +127,7 @@ const UserList = () => {
                         <button
                           className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
                           title="Edit"
-                          onClick={() => navigate('/update-user/'+user.id)}
+                          onClick={() => navigate("/update-user/" + user.id)}
                         >
                           <svg
                             className="w-4 h-4 text-blue-500"

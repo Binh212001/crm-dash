@@ -1,7 +1,5 @@
-import { TagResponseDto } from '@/api/tag/dto/tag-response.dto';
-import { Expose, Type } from 'class-transformer';
-
-
+import { TagResponseDto } from "@/api/tag/dto/tag-response.dto";
+import { Expose, Type } from "class-transformer";
 
 export class ProductResponseDto {
   @Expose()
@@ -29,7 +27,9 @@ export class ProductResponseDto {
   price?: string;
 
   @Expose()
-  @Type(() => TagResponseDto)
-  tags?: TagResponseDto
+  image?: string;
 
+  @Expose()
+  @Type(() => TagResponseDto)
+  tags?: TagResponseDto;
 }

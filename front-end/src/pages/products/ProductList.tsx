@@ -1,32 +1,38 @@
-import React from "react";
-import { useGetProductsQuery } from "../../services/product.service";
-import { useNavigate } from "react-router";
+import React, { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/hook";
+import {
+  getProducts,
+  deleteProduct,
+  type Product,
+  type ProductFilter,
+} from "@/services/product/product.action";
 
 const ProductList: React.FC = () => {
-  const { data, isLoading, isError } = useGetProductsQuery({});
-  // Import and use the useProductRelations hook to get categories and variant attributes
-  // (Assumes you have: import { useProductRelations } from "../../hooks/UseProductRelations"; at the top)
+  const dispatch = useAppDispatch();
+  const { products, loading, error } = useAppSelector(
+    (state) => state.products
+  );
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [page] = useState(1);
+  const [limit] = useState(10);
 
-  const navigate = useNavigate();
-  // For now, just show a loading or error state
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <span className="text-gray-500">Loading products...</span>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const filter: ProductFilter = {
+      page,
+      limit,
+      q: search,
+      categoryId: category || undefined,
+    };
+    dispatch(getProducts(filter));
+  }, [dispatch, search, category, page, limit]);
 
-  if (isError) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <span className="text-red-500">Failed to load products.</span>
-      </div>
-    );
-  }
-
-  // Fallback if no data
-  const products = data?.data || [];
+  const handleDelete = (id: string | undefined) => {
+    if (!id) return;
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      dispatch(deleteProduct(id));
+    }
+  };
 
   return (
     <div className="bg-white m-8 rounded-lg shadow border border-gray-200">
@@ -36,6 +42,8 @@ const ProductList: React.FC = () => {
           <select
             className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
             style={{ minWidth: 150 }}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">All Categories</option>
             <option value="digital">Digital Product</option>
@@ -47,11 +55,10 @@ const ProductList: React.FC = () => {
             placeholder="Search product name"
             className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
             style={{ minWidth: 220 }}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
-            onClick={() => navigate("/add-product")} // Add handler for opening new customer modal/form
-          >
+          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium">
             New Product
           </button>
         </div>
@@ -69,78 +76,50 @@ const ProductList: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white">
-            {products.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="text-center py-8 text-gray-400">
+                  Loading...
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan={6} className="text-center py-8 text-red-500">
+                  {typeof error === "string"
+                    ? error
+                    : "Failed to load products."}
+                </td>
+              </tr>
+            ) : products && products.length > 0 ? (
+              products.map((product: Product) => (
+                <tr
+                  key={product.id}
+                  className="border-b border-gray-100 hover:bg-gray-50"
+                >
+                  <td className="px-4 py-3">{product.id}</td>
+                  <td className="px-4 py-3">{product.name}</td>
+                  <td className="px-4 py-3">{product.categoryId || "-"}</td>
+                  <td className="px-4 py-3">{product.vendor || "-"}</td>
+                  <td className="px-4 py-3">{product.collection || "-"}</td>
+                  <td className="px-4 py-3">
+                    <button className="text-blue-600 hover:underline mr-3 text-sm">
+                      Edit
+                    </button>
+                    <button
+                      className="text-red-600 hover:underline text-sm"
+                      onClick={() => handleDelete(product.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
                 <td colSpan={6} className="text-center py-8 text-gray-400">
                   No products found.
                 </td>
               </tr>
-            ) : (
-              products.map((product) => (
-                <tr
-                  key={product.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition"
-                >
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    {product.id}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    {product.name}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {product.category?.name || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {product.vendor || "-"}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {product.collection || "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex space-x-2">
-                      <button
-                        className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
-                        title="Edit"
-                        onClick={() =>
-                          navigate(`/update-product/${product.id}`)
-                        }
-                      >
-                        <svg
-                          className="w-4 h-4 text-blue-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-red-50 transition"
-                        title="Delete"
-                      >
-                        <svg
-                          className="w-4 h-4 text-red-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
             )}
           </tbody>
         </table>

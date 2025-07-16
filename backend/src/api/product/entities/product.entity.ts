@@ -1,16 +1,25 @@
-import { AbstractEntity } from '@/database/entities/abstract.entity';
-import { Column, Entity, PrimaryColumn, ManyToMany, JoinTable, ManyToOne, JoinColumn, OneToMany, Relation } from 'typeorm';
-import { v7 } from 'uuid';
-import { CategoryEntity } from './category.entity';
-import { TagEntity } from '@/api/tag/entities/tag.entity';
+import { AbstractEntity } from "@/database/entities/abstract.entity";
+import {
+  Column,
+  Entity,
+  PrimaryColumn,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  Relation,
+} from "typeorm";
+import { v7 } from "uuid";
+import { CategoryEntity } from "./category.entity";
+import { TagEntity } from "@/api/tag/entities/tag.entity";
 
-@Entity('products')
+@Entity("products")
 export class ProductEntity extends AbstractEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn("uuid")
   id: string = v7();
-@Column()
-  sku: string 
-
+  @Column()
+  sku: string;
 
   @Column()
   name: string;
@@ -22,7 +31,7 @@ export class ProductEntity extends AbstractEntity {
   categoryId?: string;
 
   @ManyToOne(() => CategoryEntity, { nullable: true })
-  @JoinColumn({ name: 'categoryId' })
+  @JoinColumn({ name: "categoryId" })
   category?: CategoryEntity;
 
   @Column({ nullable: true })
@@ -33,17 +42,19 @@ export class ProductEntity extends AbstractEntity {
   @Column({ default: 0 })
   price?: string;
 
-  @ManyToMany(()=>TagEntity ,(tag)=>tag.products, { eager: true })
+  @ManyToMany(() => TagEntity, (tag) => tag.products, { eager: true })
   @JoinTable({
-    name: 'product_tags',
-    joinColumn: { name: 'productId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tagId', referencedColumnName: 'id' },
+    name: "product_tags",
+    joinColumn: { name: "productId", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "tagId", referencedColumnName: "id" },
   })
-  tags?: Relation< TagEntity>[];
+  tags?: Relation<TagEntity>[];
 
+  @Column({ nullable: true })
+  image?: string;
 
   constructor(data?: Partial<ProductEntity>) {
     super();
     Object.assign(this, data);
   }
-} 
+}

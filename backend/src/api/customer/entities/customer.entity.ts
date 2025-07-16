@@ -1,10 +1,10 @@
-import { AbstractEntity } from '@/database/entities/abstract.entity';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
-import { v7 } from 'uuid';
+import { AbstractEntity } from "@/database/entities/abstract.entity";
+import { Column, Entity, PrimaryColumn } from "typeorm";
+import { v7 } from "uuid";
 
-@Entity('customers')
+@Entity("customers")
 export class CustomerEntity extends AbstractEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn("uuid")
   id: string = v7();
 
   @Column({ length: 100 })
@@ -31,7 +31,7 @@ export class CustomerEntity extends AbstractEntity {
   @Column({ default: 0 })
   orders: number;
 
-  @Column({ type: 'decimal', default: 0 })
+  @Column({ type: "decimal", default: 0 })
   totalSpent: number;
 
   @Column({ nullable: true })
@@ -43,11 +43,11 @@ export class CustomerEntity extends AbstractEntity {
   @Column({ nullable: true })
   avatar?: string;
 
-  @Column({ type: 'simple-array', nullable: true })
+  @Column({ type: "simple-array", nullable: true })
   tags?: string[];
 
   constructor(data?: Partial<CustomerEntity>) {
     super();
     Object.assign(this, data);
   }
-} 
+}

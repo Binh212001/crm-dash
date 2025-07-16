@@ -1,7 +1,5 @@
-
-import { FileResDto } from '@/api/base/dto/file-res.dto';
-import { AbstractEntity } from '@/database/entities/abstract.entity';
-import { hashPassword } from '@/utils/password.util';
+import { AbstractEntity } from "@/database/entities/abstract.entity";
+import { hashPassword } from "@/utils/password.util";
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -11,59 +9,56 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany, 
   PrimaryColumn,
-  Relation
-} from 'typeorm';
-import { v7 } from 'uuid';
-import { RoleEntity } from '../../permissions/entities/role.entity';
+  Relation,
+} from "typeorm";
+import { v7 } from "uuid";
+import { RoleEntity } from "../../permissions/entities/role.entity";
 
-@Entity('users')
+@Entity("users")
 export class UserEntity extends AbstractEntity {
-  @PrimaryColumn('uuid', { primaryKeyConstraintName: 'PK_user_id' })
+  @PrimaryColumn("uuid", { primaryKeyConstraintName: "PK_user_id" })
   id: string;
   @Column({
     length: 50,
     nullable: true,
   })
-
-
   @Column({
     length: 100,
-    default: '',
+    default: "",
   })
   firstName: string;
   @Column({
-    default: '',
+    default: "",
     length: 100,
   })
   lastName: string;
   @Column({
-    nullable: true
+    nullable: true,
   })
   name: string;
   @Column()
-  @Index('UQ_user_email', { where: '"deleted_at" IS NULL', unique: true })
+  @Index("UQ_user_email", { where: '"deleted_at" IS NULL', unique: true })
   email!: string;
 
-  @Column({ default: '' })
+  @Column({ default: "" })
   phoneNumber?: string;
-  @Column({ default: '', nullable: true })
+  @Column({ default: "", nullable: true })
   address?: string;
 
   @Column({ nullable: true })
   dateOfBirth?: Date;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   password!: string;
-  @Column({ default: '' })
+  @Column({ default: "" })
   bio?: string;
-  @Column({nullable: true })
+  @Column({ nullable: true })
   avatar?: string;
   @Column({ default: 0 })
   numberOfCourse: number;
   @Column({
-    type: 'boolean',
+    type: "boolean",
     nullable: false,
     default: false,
   })
@@ -76,9 +71,8 @@ export class UserEntity extends AbstractEntity {
   @JoinColumn()
   role: Relation<RoleEntity>;
 
-
   @DeleteDateColumn({
-    type: 'timestamptz',
+    type: "timestamptz",
     default: null,
   })
   deletedAt: Date;
@@ -92,13 +86,13 @@ export class UserEntity extends AbstractEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
-    this.name = this.firstName + " " + this.lastName
+    this.name = this.firstName + " " + this.lastName;
     if (this.password && !this.isPasswordHashed()) {
       this.password = await hashPassword(this.password);
     }
   }
 
   private isPasswordHashed(): boolean {
-    return this.password.startsWith('$argon2');
+    return this.password.startsWith("$argon2");
   }
 }

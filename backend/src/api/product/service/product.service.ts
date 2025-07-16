@@ -1,12 +1,9 @@
 import { ListBaseReqDto } from "@/api/base/dto/list-base.req.dto";
+import { BunnyUploadRes } from "@/api/bunny/bunny-file-interceptor";
 import { TagRepository } from "@/api/tag/tag.repository";
 import { OffsetPaginatedDto } from "@/common/dto/offset-pagination/paginated.dto";
 import { paginate } from "@/utils/offset-pagination";
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
 import { In } from "typeorm";
 import { CreateProductDto } from "../dto/create-product.dto";
@@ -21,7 +18,7 @@ export class ProductService {
     private readonly tagRepository: TagRepository
   ) {}
 
-  async create(dto: CreateProductDto) {
+  async create(dto: CreateProductDto, file: BunnyUploadRes[]) {
     const { tags = [], ...rest } = dto;
     const tagList =
       tags.length > 0
@@ -34,8 +31,11 @@ export class ProductService {
     const product = this.productRepository.create({
       ...rest,
       tags: tagList,
+      ...(file.length > 0 && {
+        image: file[0].url,
+      }),
     });
-    const prSave = await this.productRepository.save(product);
+    await this.productRepository.save(product);
 
     const res = await this.productRepository.findOne({
       where: { id: product.id },

@@ -9,6 +9,12 @@ import axios from "axios";
 import multer from "multer";
 import { Observable, from, map, switchMap } from "rxjs";
 
+export interface BunnyUploadRes {
+  storename: string;
+  filename: string;
+  url: string;
+}
+
 @Injectable()
 export class BunnyUploadInterceptor implements NestInterceptor {
   private readonly multerInstance: any;
@@ -44,13 +50,13 @@ export class BunnyUploadInterceptor implements NestInterceptor {
         const files: Express.Multer.File[] = req.files;
 
         if (!files || files.length === 0) {
-          return next.handle(); // Không có file
+          return next.handle(); // No files, proceed as usual
         }
 
-        // Tạo danh sách upload
+        // Create upload tasks for each file
         const uploadTasks = files.map((file) => {
           const fileName = `${Date.now()}-${file.originalname}`;
-          const uploadUrl = `https://storage.bunnycdn.com/${this.storageZone}/${this.folder}/${fileName}`;
+          const uploadUrl = `https://storage.bunnycdn.com/${this.storageZone}/${fileName}`;
 
           return from(
             axios.put(uploadUrl, file.buffer, {
@@ -62,7 +68,11 @@ export class BunnyUploadInterceptor implements NestInterceptor {
           ).pipe(
             map(
               () =>
-                `https://${this.storageZone}.b-cdn.net/${this.folder}/${fileName}`
+                ({
+                  storename: this.storageZone,
+                  filename: fileName,
+                  url: uploadUrl,
+                } as BunnyUploadRes)
             )
           );
         });
@@ -70,8 +80,8 @@ export class BunnyUploadInterceptor implements NestInterceptor {
         return from(
           Promise.all(uploadTasks.map((obs) => obs.toPromise()))
         ).pipe(
-          map((uploadedUrls: string[]) => {
-            req.fileUrls = uploadedUrls; // ⬅️ gán URL file vào request
+          map((uploadResponses: BunnyUploadRes[]) => {
+            req.bunnyFile = uploadResponses;
             return req;
           }),
           switchMap(() => next.handle())
