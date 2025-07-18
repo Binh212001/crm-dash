@@ -119,7 +119,12 @@ const CustomerList = () => {
                         : "-"}
                     </td>
                     <td className="px-4 py-3">
-                      <button className="text-blue-600 hover:underline text-sm mr-2">
+                      <button
+                        className="text-blue-600 hover:underline text-sm mr-2"
+                        onClick={() =>
+                          navigate(`/update-customer/${customer.id}`)
+                        }
+                      >
                         Edit
                       </button>
                       <button

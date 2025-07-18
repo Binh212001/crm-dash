@@ -27,9 +27,9 @@ export class BunnyUploadInterceptor implements NestInterceptor {
     this.multerInstance = multer({
       storage: multer.memoryStorage(),
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB per file
+        fileSize: 20 * 1024 * 1024,
       },
-    }).array("files"); // 👈 xử lý nhiều file với key là 'files'
+    }).array("files");
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
