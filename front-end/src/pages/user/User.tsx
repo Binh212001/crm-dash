@@ -1,64 +1,60 @@
-import React, { useState } from "react";
+import { useAppDispatch } from "@/app/hook";
+import type { RootState } from "@/app/store";
+import { deleteUser, getUsers } from "@/services/user/user.action";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
-// Mock data based on backend/src/api/user/dto/user-response.dto.ts
-const mockUsers = [
-  {
-    id: "1",
-    firstName: "Alice",
-    lastName: "Smith",
-    email: "alice@example.com",
-    phoneNumber: "1234567890",
-    address: "123 Main St",
-    dateOfBirth: "1990-01-01",
-    bio: "Frontend developer",
-    name: "Alice Smith",
-    avatar: null,
-    role: { id: "r1", name: "Admin" },
-    createdAt: "2024-06-01T10:00:00Z",
-    updatedAt: "2024-06-05T12:00:00Z",
-  },
-  {
-    id: "2",
-    firstName: "Bob",
-    lastName: "Johnson",
-    email: "bob@example.com",
-    phoneNumber: "0987654321",
-    address: "456 Elm St",
-    dateOfBirth: "1985-05-15",
-    bio: "Backend developer",
-    name: "Bob Johnson",
-    avatar: null,
-    role: { id: "r2", name: "User" },
-    createdAt: "2024-06-02T11:00:00Z",
-    updatedAt: "2024-06-06T14:00:00Z",
-  },
-];
-
 const UserList = () => {
-  const [users, setUsers] = useState(mockUsers);
   const [search, setSearch] = useState("");
+  const [pageParams, setPageParams] = useState<{ page: number; limit: number }>(
+    {
+      page: 1,
+      limit: 10,
+    }
+  );
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const searchUser = (value: string) => {
-    setSearch(value);
-    if (!value) {
-      setUsers(mockUsers);
-    } else {
-      setUsers(
-        mockUsers.filter(
-          (user) =>
-            user.firstName.toLowerCase().includes(value.toLowerCase()) ||
-            user.lastName.toLowerCase().includes(value.toLowerCase()) ||
-            user.email.toLowerCase().includes(value.toLowerCase())
-        )
-      );
-    }
-  };
+  const { users, loading, pagination } = useSelector(
+    (state: RootState) => state.users
+  );
+
+  useEffect(() => {
+    dispatch(
+      getUsers({
+        q: search,
+        ...pageParams,
+      })
+    );
+  }, [dispatch, search]);
 
   const handleDeleteUser = (id: string) => {
-    setUsers((prev) => prev.filter((user) => user.id !== id));
+    dispatch(deleteUser(id));
   };
+
+  const handlePageChange = (newPage: number) => {
+    setPageParams((prev) => ({
+      ...prev,
+      page: newPage,
+    }));
+  };
+
+  const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPageParams({
+      page: 1,
+      limit: Number(e.target.value),
+    });
+  };
+
+  // Filter users by search (on name or email)
+  const filteredUsers = users.filter((user) => {
+    const searchLower = search.toLowerCase();
+    return (
+      user.name?.toLowerCase().includes(searchLower) ||
+      user.email?.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -71,7 +67,7 @@ const UserList = () => {
               className="px-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
               placeholder="Search by username, email, etc."
               value={search}
-              onChange={(e) => searchUser(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
             />
 
             <button
@@ -86,8 +82,7 @@ const UserList = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-700 text-sm">
-                <th className="px-4 py-3 text-left font-medium">First Name</th>
-                <th className="px-4 py-3 text-left font-medium">Last Name</th>
+                <th className="px-4 py-3 text-left font-medium">Name</th>
                 <th className="px-4 py-3 text-left font-medium">Email</th>
                 <th className="px-4 py-3 text-left font-medium">Created At</th>
                 <th className="px-4 py-3 text-left font-medium">Updated At</th>
@@ -95,82 +90,122 @@ const UserList = () => {
               </tr>
             </thead>
             <tbody>
-              {users.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-6 text-gray-500">
-                    No users found.
+                  <td colSpan={6} className="text-center py-6 text-gray-500">
+                    Loading...
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="px-4 py-3 text-gray-700">
-                      {user.firstName}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700">{user.lastName}</td>
-                    <td className="px-4 py-3 text-gray-600">{user.email}</td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {user.updatedAt
-                        ? new Date(user.updatedAt).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button
-                          className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
-                          title="Edit"
-                          onClick={() => navigate("/update-user/" + user.id)}
-                        >
-                          <svg
-                            className="w-4 h-4 text-blue-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                filteredUsers.map((user) => {
+                  return (
+                    <tr
+                      key={user.id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
+                      <td className="px-4 py-3 text-gray-700">{user.name}</td>
+                      <td className="px-4 py-3 text-gray-600">{user.email}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {user.createdAt
+                          ? new Date(user.createdAt).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {user.updatedAt
+                          ? new Date(user.updatedAt).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex space-x-2">
+                          <button
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-blue-50 transition"
+                            title="Edit"
+                            onClick={() => navigate("/update-user/" + user.id)}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-red-50 transition"
-                          title="Delete"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <svg
-                            className="w-4 h-4 text-red-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                            <svg
+                              className="w-4 h-4 text-blue-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-red-50 transition"
+                            title="Delete"
+                            onClick={() => handleDeleteUser(user.id)}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                            <svg
+                              className="w-4 h-4 text-red-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
         {/* Pagination controls could go here if needed */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+          <div>
+            <span className="text-sm text-gray-600">
+              Page {pagination?.currentPage || 1} of{" "}
+              {pagination?.totalPages || 1}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() =>
+                handlePageChange((pagination?.currentPage || 1) - 1)
+              }
+              disabled={!pagination || pagination.currentPage <= 1}
+            >
+              Previous
+            </button>
+            <button
+              className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+              onClick={() =>
+                handlePageChange((pagination?.currentPage || 1) + 1)
+              }
+              disabled={
+                !pagination || pagination.currentPage >= pagination.totalPages
+              }
+            >
+              Next
+            </button>
+            <select
+              className="ml-2 px-2 py-1 border rounded text-sm"
+              value={pageParams.limit}
+              onChange={handleLimitChange}
+            >
+              {[10, 20, 50, 100].map((size) => (
+                <option key={size} value={size}>
+                  {size} / page
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   );

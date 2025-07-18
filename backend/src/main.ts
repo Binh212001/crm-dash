@@ -13,10 +13,11 @@ import {
 import { ValidationError } from "class-validator";
 import path from "path";
 import * as express from "express";
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { MicroserviceOptions, Transport } from "@nestjs/microservices";
 import { AuthGuard } from "./guards/auth.graud";
 import { JwtService } from "./api/auth/services/jwt.service";
 import { UserService } from "./api/user/user.service";
+import { GlobalExceptionFilter } from "./filters/global-exception.filter";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector);
@@ -24,20 +25,21 @@ async function bootstrap() {
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
-  options: {
-    urls: ['amqp://localhost:5672'],
-    queue: 'send_mail',
-    queueOptions: {
-      durable: false 
+    options: {
+      urls: ["amqp://localhost:5672"],
+      queue: "send_mail",
+      queueOptions: {
+        durable: false,
+      },
+      noAck: false,
+      exchange: "send_email",
+      exchangeType: "direct",
+      routingKey: "info",
     },
-    noAck: false,
-    exchange: 'send_email',
-    exchangeType: 'direct',
-    routingKey: 'info',
-  },
   });
 
   await app.startAllMicroservices();
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   const corsOrigin = configService.getOrThrow("app.corsOrigin", {
     infer: true,
@@ -92,10 +94,15 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document); // Swagger UI sẽ chạy tại /api
   app.use("/public", express.static(path.join(__dirname, "public")));
-  
+
   // Serve Socket.IO client library
-  app.use('/socket.io', express.static(path.join(__dirname, '../node_modules/socket.io/client-dist')));
-  
+  app.use(
+    "/socket.io",
+    express.static(
+      path.join(__dirname, "../node_modules/socket.io/client-dist")
+    )
+  );
+
   await app.listen(
     configService.getOrThrow("app.port", { infer: true }),
     () => {

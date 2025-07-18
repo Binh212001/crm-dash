@@ -4,16 +4,11 @@ import {
   PasswordFieldOptional,
   StringField,
   StringFieldOptional,
-  UserNameField
-} from '@/decorators/field.decorators';
+} from "@/decorators/field.decorators";
 
 export class CreateUserDto {
- 
-  @StringField({ minLength: 1, maxLength: 100 })
-  firstName: string;
-
-  @StringField({ minLength: 1, maxLength: 100 })
-  lastName: string;
+  @StringField({ minLength: 1, maxLength: 1000 })
+  name: string;
 
   @PasswordFieldOptional({ minLength: 1, maxLength: 100 })
   password: string;
@@ -32,9 +27,4 @@ export class CreateUserDto {
 
   @StringFieldOptional()
   bio?: string;
-
-  @StringFieldOptional()
-  avatar?: string;
-
- 
-} 
+}

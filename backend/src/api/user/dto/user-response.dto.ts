@@ -1,17 +1,9 @@
-import { RoleResponseDto } from '@/api/permissions/dto/role-response.dto';
-import { Expose, Type } from 'class-transformer';
+import { RoleResponseDto } from "@/api/permissions/dto/role-response.dto";
+import { Expose, Type } from "class-transformer";
 
 export class UserResponseDto {
   @Expose()
   id: string;
-
-
-
-  @Expose()
-  firstName: string;
-
-  @Expose()
-  lastName: string;
 
   @Expose()
   email: string;
@@ -34,6 +26,6 @@ export class UserResponseDto {
   @Expose()
   avatar?: any;
 
-  @Type(()=>RoleResponseDto)
-  role : RoleResponseDto
-} 
+  @Type(() => RoleResponseDto)
+  role: RoleResponseDto;
+}

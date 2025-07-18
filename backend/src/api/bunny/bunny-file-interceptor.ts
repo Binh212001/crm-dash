@@ -20,9 +20,8 @@ export class BunnyUploadInterceptor implements NestInterceptor {
   private readonly multerInstance: any;
 
   constructor(
-    private readonly storageZone = "demo2002",
-    private readonly apiKey = "d1b10df3-863c-4eff-b4cfcce9a44a-f055-450e",
-    private readonly folder = "images"
+    private readonly storageZone = "crm-dash",
+    private readonly apiKey = "38adf11e-738d-4e10-99e92f22ce14-4637-4534"
   ) {
     this.multerInstance = multer({
       storage: multer.memoryStorage(),
@@ -56,7 +55,7 @@ export class BunnyUploadInterceptor implements NestInterceptor {
         // Create upload tasks for each file
         const uploadTasks = files.map((file) => {
           const fileName = `${Date.now()}-${file.originalname}`;
-          const uploadUrl = `https://storage.bunnycdn.com/${this.storageZone}/${fileName}`;
+          const uploadUrl = `https://crm-dash.b-cdn.net/${fileName}`;
 
           return from(
             axios.put(uploadUrl, file.buffer, {
