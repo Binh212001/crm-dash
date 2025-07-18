@@ -1,5 +1,12 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { StringField, StringFieldOptional, UUIDFieldOptional, ClassFieldOptional } from '@/decorators/field.decorators';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import {
+  StringField,
+  StringFieldOptional,
+  UUIDFieldOptional,
+  ClassFieldOptional,
+  NumberFieldOptional,
+} from "@/decorators/field.decorators";
+import { IsArray } from "class-validator";
 
 export class CreateProductDto {
   @StringField()
@@ -20,12 +27,13 @@ export class CreateProductDto {
   @StringFieldOptional()
   collection?: string;
 
-  @StringFieldOptional()
+  @NumberFieldOptional()
   stock?: string;
+
   @StringFieldOptional()
   price?: string;
 
   @UUIDFieldOptional({ each: true })
+  @IsArray()
   tags?: string[];
-
 }

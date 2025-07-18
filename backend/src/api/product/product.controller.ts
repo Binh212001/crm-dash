@@ -41,8 +41,14 @@ export class ProductController {
   }
 
   @Put(":id")
-  update(@Param("id") id: string, @Body() dto: UpdateProductDto) {
-    return this.productService.update(id, dto);
+  @UseInterceptors(new BunnyUploadInterceptor())
+  update(
+    @Param("id") id: string,
+    @Body() dto: UpdateProductDto,
+    @Req() req: any
+  ) {
+    const files: BunnyUploadRes[] = req.bunnyFile;
+    return this.productService.update(id, dto, files);
   }
 
   @Delete(":id")

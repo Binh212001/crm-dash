@@ -55,7 +55,7 @@ export class BunnyUploadInterceptor implements NestInterceptor {
         // Create upload tasks for each file
         const uploadTasks = files.map((file) => {
           const fileName = `${Date.now()}-${file.originalname}`;
-          const uploadUrl = `https://crm-dash.b-cdn.net/${fileName}`;
+          const uploadUrl = `https://storage.bunnycdn.com/${this.storageZone}/${fileName}`;
 
           return from(
             axios.put(uploadUrl, file.buffer, {
@@ -70,7 +70,7 @@ export class BunnyUploadInterceptor implements NestInterceptor {
                 ({
                   storename: this.storageZone,
                   filename: fileName,
-                  url: uploadUrl,
+                  url: `https://crm-dash.b-cdn.net/${fileName}`,
                 } as BunnyUploadRes)
             )
           );

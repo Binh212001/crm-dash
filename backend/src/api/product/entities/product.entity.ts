@@ -39,8 +39,12 @@ export class ProductEntity extends AbstractEntity {
 
   @Column({ nullable: true })
   collection?: string;
+
   @Column({ default: 0 })
   price?: string;
+
+  @Column({ default: 0 })
+  stock?: string;
 
   @ManyToMany(() => TagEntity, (tag) => tag.products, { eager: true })
   @JoinTable({

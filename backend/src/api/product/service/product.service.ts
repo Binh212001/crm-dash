@@ -10,6 +10,7 @@ import { CreateProductDto } from "../dto/create-product.dto";
 import { ProductResponseDto } from "../dto/product-response";
 import { UpdateProductDto } from "../dto/update-product.dto";
 import { ProductRepository } from "../repository/product.repository";
+import { Transactional } from "typeorm-transactional";
 
 @Injectable()
 export class ProductService {
@@ -18,6 +19,7 @@ export class ProductService {
     private readonly tagRepository: TagRepository
   ) {}
 
+  @Transactional()
   async create(dto: CreateProductDto, file: BunnyUploadRes[]) {
     const { tags = [], ...rest } = dto;
     const tagList =
@@ -45,11 +47,15 @@ export class ProductService {
   }
 
   async findAll(dto: ListBaseReqDto) {
+    const { q } = dto;
     const query = this.productRepository
       .createQueryBuilder("product")
       .leftJoinAndSelect("product.tags", "tags")
       .leftJoinAndSelect("product.category", "category")
       .orderBy("product.id", "DESC");
+    if (q) {
+      query.where("product.name ILIKE :q", { q: `%${q}%` });
+    }
 
     const [base, metaDto] = await paginate(query, dto, {
       skipCount: false,
@@ -74,12 +80,17 @@ export class ProductService {
     return plainToInstance(ProductResponseDto, product);
   }
 
-  async update(id: string, dto: UpdateProductDto) {
+  async update(id: string, dto: UpdateProductDto, files: BunnyUploadRes[]) {
     const product = await this.productRepository.findOneBy({ id });
     if (!product) {
       throw new NotFoundException("Product not found");
     }
-    Object.assign(product, dto);
+    Object.assign(product, {
+      ...dto,
+      ...(files?.length > 0 && {
+        image: files[0].url,
+      }),
+    });
     await this.productRepository.save(product);
     // Optionally update variants here if needed
     const updated = await this.productRepository.findOne({

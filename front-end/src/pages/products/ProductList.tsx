@@ -6,26 +6,29 @@ import {
   type Product,
   type ProductFilter,
 } from "@/services/product/product.action";
+import { useNavigate } from "react-router";
 
 const ProductList: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { products, loading, error } = useAppSelector(
+  const navigate = useNavigate();
+  const { products, loading, pagination, error } = useAppSelector(
     (state) => state.products
   );
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
-  const [page] = useState(1);
-  const [limit] = useState(10);
-
+  const [pageParams, setPageParams] = useState<{ page: number; limit: number }>(
+    {
+      page: 1,
+      limit: 10,
+    }
+  );
   useEffect(() => {
     const filter: ProductFilter = {
-      page,
-      limit,
       q: search,
       categoryId: category || undefined,
     };
     dispatch(getProducts(filter));
-  }, [dispatch, search, category, page, limit]);
+  }, [dispatch, search, category]);
 
   const handleDelete = (id: string | undefined) => {
     if (!id) return;
@@ -34,6 +37,19 @@ const ProductList: React.FC = () => {
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPageParams((prev) => ({
+      ...prev,
+      page: newPage,
+    }));
+  };
+
+  const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPageParams({
+      page: 1,
+      limit: Number(e.target.value),
+    });
+  };
   return (
     <div className="bg-white m-8 rounded-lg shadow border border-gray-200">
       <div className="px-6 pt-4 pb-2 flex items-center justify-between border-b border-gray-100">
@@ -58,7 +74,10 @@ const ProductList: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium">
+          <button
+            onClick={() => navigate("/add-product")}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium"
+          >
             New Product
           </button>
         </div>
@@ -97,12 +116,18 @@ const ProductList: React.FC = () => {
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
                   <td className="px-4 py-3">{product.id}</td>
-                  <td className="px-4 py-3">{product.name}</td>
+                  <td className="flex items-center gap-3  px-4 py-3">
+                    <img src={product.image} className="size-24 rounded-xl" />
+                    <span className="font-bold">{product.name}</span>
+                  </td>
                   <td className="px-4 py-3">{product.categoryId || "-"}</td>
                   <td className="px-4 py-3">{product.vendor || "-"}</td>
                   <td className="px-4 py-3">{product.collection || "-"}</td>
                   <td className="px-4 py-3">
-                    <button className="text-blue-600 hover:underline mr-3 text-sm">
+                    <button
+                      onClick={() => navigate(`/update-product/${product.id}`)}
+                      className="text-blue-600 hover:underline mr-3 text-sm"
+                    >
                       Edit
                     </button>
                     <button
@@ -123,6 +148,43 @@ const ProductList: React.FC = () => {
             )}
           </tbody>
         </table>
+      </div>
+      {/* Pagination controls could go here if needed */}
+      <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+        <div>
+          <span className="text-sm text-gray-600">
+            Page {pagination?.currentPage || 1} of {pagination?.totalPages || 1}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+            onClick={() => handlePageChange((pagination?.currentPage || 1) - 1)}
+            disabled={!pagination || pagination.currentPage <= 1}
+          >
+            Previous
+          </button>
+          <button
+            className="px-3 py-1 rounded border text-sm disabled:opacity-50"
+            onClick={() => handlePageChange((pagination?.currentPage || 1) + 1)}
+            disabled={
+              !pagination || pagination.currentPage >= pagination.totalPages
+            }
+          >
+            Next
+          </button>
+          <select
+            className="ml-2 px-2 py-1 border rounded text-sm"
+            value={pageParams.limit}
+            onChange={handleLimitChange}
+          >
+            {[10, 20, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                {size} / page
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );

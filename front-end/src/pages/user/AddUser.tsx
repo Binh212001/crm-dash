@@ -77,7 +77,7 @@ const AddUser = () => {
       }
 
       setLoading(false);
-      // navigate("/users");
+      navigate("/users");
     } catch (err: any) {
       setLoading(false);
       setError(

@@ -18,11 +18,12 @@ import { AuthGuard } from "./guards/auth.graud";
 import { JwtService } from "./api/auth/services/jwt.service";
 import { UserService } from "./api/user/user.service";
 import { GlobalExceptionFilter } from "./filters/global-exception.filter";
+import { initializeTransactionalContext } from "typeorm-transactional";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector);
   const configService = app.get(ConfigService<AllConfigType>);
-
+  initializeTransactionalContext();
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
