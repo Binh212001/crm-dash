@@ -3,7 +3,7 @@ import type { Pagination } from "@/types/pagination.type";
 import axios from "axios";
 
 export interface Customer {
-  id?: string;
+  id: string;
   name: string;
   email: string;
   orders?: number;

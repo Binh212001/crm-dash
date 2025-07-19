@@ -11,6 +11,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
+      name: "default", // Explicitly set the data source name
       autoLoadEntities: true,
       type: "postgres",
       host: this.configService.get<string>("DATABASE_HOST"),

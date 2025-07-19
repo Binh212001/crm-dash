@@ -3,8 +3,8 @@ import { BackgroundModule } from "@/background/background.module";
 import appConfig from "@/config/app.config";
 import { TypeOrmConfigService } from "@/database/typeorm-config.service";
 import { EventModule } from "@/events/event.module";
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { MailerModule } from "@nestjs-modules/mailer";
+import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { BullModule } from "@nestjs/bull";
 import { CacheModule } from "@nestjs/cache-manager";
 import { ModuleMetadata } from "@nestjs/common";
@@ -19,7 +19,7 @@ import {
   StorageDriver,
 } from "typeorm-transactional";
 
-import * as redisStore from 'cache-manager-ioredis';
+import * as redisStore from "cache-manager-ioredis";
 function generateModulesSet() {
   const imports: ModuleMetadata["imports"] = [
     ConfigModule.forRoot({
@@ -30,15 +30,15 @@ function generateModulesSet() {
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, "../../../", "public"),
     }),
-    BackgroundModule ,
+    BackgroundModule,
     MailerModule.forRootAsync({
       useFactory: () => ({
-        transport: 'smtps://user@domain.com:pass@smtp.domain.com',
+        transport: "smtps://user@domain.com:pass@smtp.domain.com",
         defaults: {
           from: '"nest-modules" <modules@nestjs.com>',
         },
         template: {
-          dir: __dirname + '/templates',
+          dir: __dirname + "/templates",
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
@@ -66,35 +66,49 @@ function generateModulesSet() {
       if (!options) {
         throw new Error("Invalid options passed");
       }
+
+      // Initialize transactional context only once
       initializeTransactionalContext({
         storageDriver: StorageDriver.ASYNC_LOCAL_STORAGE,
       });
 
-      return addTransactionalDataSource(new DataSource(options));
+      // Create data source with explicit name to avoid conflicts
+      const dataSource = new DataSource({
+        ...options,
+        name: "default",
+      });
+
+      return addTransactionalDataSource(dataSource);
     },
   });
-
- 
-
 
   const cacheModule = CacheModule.registerAsync({
     imports: [ConfigModule],
     useFactory: async (configService: ConfigService) => {
-      console.log("🚀 ~ useFactory: ~ configService:", configService.get('REDIS_HOST'))
+      console.log(
+        "🚀 ~ useFactory: ~ configService:",
+        configService.get("REDIS_HOST")
+      );
       return {
         store: redisStore,
-        host: configService.get('REDIS_HOST', 'localhost'),
-        port: configService.get('REDIS_PORT', 8002),
-        password: configService.get('REDIS_PASSWORD', 'redispass'),
+        host: configService.get("REDIS_HOST", "localhost"),
+        port: configService.get("REDIS_PORT", 8002),
+        password: configService.get("REDIS_PASSWORD", "redispass"),
         db: 0,
-        tls: false
+        tls: false,
       };
     },
     isGlobal: true,
     inject: [ConfigService],
   });
 
-  const customModules = [cacheModule, dbModule, redisModule, ApiModule , EventModule];
+  const customModules = [
+    cacheModule,
+    dbModule,
+    redisModule,
+    ApiModule,
+    EventModule,
+  ];
 
   return imports.concat(customModules);
 }

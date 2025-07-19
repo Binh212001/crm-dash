@@ -33,7 +33,7 @@ export class ProductService {
     const product = this.productRepository.create({
       ...rest,
       tags: tagList,
-      ...(file.length > 0 && {
+      ...(file?.length > 0 && {
         image: file[0].url,
       }),
     });

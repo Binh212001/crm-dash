@@ -4,8 +4,8 @@ POST http://localhost:8000/auth/login
 Content-Type: application/json
 
 {
-   "email": "admin@example.com",
-  "password": "newpassword123"
+  "email": "admin@example.com",
+  "password": "11111111"
 }
 
 ###a
@@ -16,7 +16,7 @@ Content-Type: application/json
 {
 
   "email": "admin@example.com",
-  "password": "newpassword123",
+  "password": "1111",
   "firstName": "New",
   "lastName": "User"
 }
@@ -39,10 +39,11 @@ Authorization: Bearer {{accessToken}}
 ### CUSTOMER
 POST http://localhost:8000/customer
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTk4MjA2Mi00YWE1LTc0YWEtYjhiMS02NDQ1NTc4ODVmMjIiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWF0IjoxNzUyODkzOTc3LCJleHAiOjE3NTM0OTg3Nzd9.WUwzgxMDsKhNPt9z1olEm549KxovaOHXzjgIk98mi2s
 
 {
-  "name": "Carry Anna",
-  "email": "annac34@gmail.com",
+  "name": "Pham Ngoc Binh",
+  "email": "annac31@gmail.com",
   "orders": 89,
   "totalSpent": 23987,
   "city": "Budapest",
@@ -210,23 +211,15 @@ DELETE http://localhost:8000/variant-attribute/{{attributeId}}
 
 ### PRODUCT
 POST http://localhost:8000/products
-Content-Type: application/json
+Content-Type: multipart/form-data
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTk4MjA2Mi00YWE1LTc0YWEtYjhiMS02NDQ1NTc4ODVmMjIiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWF0IjoxNzUyODkzOTc3LCJleHAiOjE3NTM0OTg3Nzd9.WUwzgxMDsKhNPt9z1olEm549KxovaOHXzjgIk98mi2s
 
 {
   "sku": "SKU-001",
   "name": "Product A",
-"description": "Mô tả sản phẩm A",
+  "description": "Mô tả sản phẩm A",
   "vendor": "Vendor X",
-  "collection": "Collection Y",
-  "tags": ["0197c680-7fca-7368-8d62-295536b5e8ac"],
-  "categoryId": "0197c680-7fca-7368-8d62-295536b5e8ac",
-  "productVariant": [
-    {
-      "price": 99.99,
-      "attributeId": "0197c678-9d90-736b-9502-9ceac1c9fbd1",
-      "values": ["0197c678-9db5-712b-b2ac-4af6609a3171"]
-    }
-  ]
+  "collection": "Collection Y"
 }
 ###
 GET http://localhost:8000/products
