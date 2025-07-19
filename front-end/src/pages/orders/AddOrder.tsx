@@ -2,13 +2,6 @@ import React, { useEffect, useState } from "react";
 
 import clsx from "clsx";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@radix-ui/react-select";
 import Button from "@/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,13 +50,6 @@ const initialForm: CreateOrderFormValues = {
   billingAddress: "",
   items: [initialItem],
 };
-
-const orderStatusOptions = [
-  { value: "PENDING", label: "Pending" },
-  { value: "PROCESSING", label: "Processing" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "CANCELLED", label: "Cancelled" },
-];
 
 const AddOrder: React.FC = () => {
   const [form, setForm] = useState<CreateOrderFormValues>(initialForm);

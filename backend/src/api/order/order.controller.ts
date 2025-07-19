@@ -1,14 +1,12 @@
-import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { ListOrderDto } from './dto/list-order.dto';
-import { OrderResponseDto } from './dto/order-response.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderStatus } from './entities/order.entity';
-import { OrderService } from './order.service';
-import { DeleteBaseResDto } from '../base/dto/delete-base.res.dto';
+import { OffsetPaginatedDto } from "@/common/dto/offset-pagination/paginated.dto";
+import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
+import { CreateOrderDto } from "./dto/create-order.dto";
+import { ListOrderDto } from "./dto/list-order.dto";
+import { OrderResponseDto } from "./dto/order-response.dto";
+import { OrderStatus } from "./entities/order.entity";
+import { OrderService } from "./order.service";
 
-@Controller('orders')
+@Controller("orders")
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
@@ -18,39 +16,28 @@ export class OrderController {
   }
 
   @Get()
-  async findAll(@Query() dto: ListOrderDto): Promise<OffsetPaginatedDto<OrderResponseDto>> {
+  async findAll(
+    @Query() dto: ListOrderDto
+  ): Promise<OffsetPaginatedDto<OrderResponseDto>> {
     return this.orderService.findAll(dto);
   }
 
-  @Get('overview')
+  @Get("overview")
   async getOrderOverview() {
     const res = this.orderService.getOrderOverview();
-    return res
+    return res;
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<OrderResponseDto> {
+  @Get(":id")
+  async findOne(@Param("id") id: string): Promise<OrderResponseDto> {
     return this.orderService.findOne(id);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateOrderDto): Promise<OrderResponseDto> {
-    return this.orderService.update(id, data);
-  }
-
-  @Put(':id/status')
+  @Put(":id/status")
   async updateStatus(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() data: { status: OrderStatus }
   ): Promise<OrderResponseDto> {
     return this.orderService.updateStatus(id, data.status);
   }
-
-
-
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<DeleteBaseResDto> {
-    return this.orderService.remove(id);
-  }
- 
-} 
+}

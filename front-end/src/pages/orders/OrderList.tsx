@@ -1,168 +1,22 @@
 import { useNavigate } from "react-router";
 import OrderOverview from "./OrderOverview";
-import { useEffect, useState } from "react";
-
-// Mock data based on backend/src/api/order/dto/order-response.dto.ts
-// Interfaces for Order, OrderItem, Product, and Customer
-
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  description: string;
-  categoryId: string;
-  vendor: string;
-  collection: string;
-  stock: string;
-  price: string;
-  image: string;
-  tags: string[];
-}
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  product: Product;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-}
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  status: string;
-  subtotal: number;
-  tax: number;
-  shipping: number;
-  total: number;
-  customerId: string;
-  userId: string;
-  notes: string;
-  shippingAddress: string;
-  billingAddress: string;
-  trackingNumber: string;
-  estimatedDelivery: string;
-  shippedAt: string | null;
-  deliveredAt: string | null;
-  items: OrderItem[];
-  customer: Customer;
-  createdAt: string;
-  updatedAt: string;
-}
-
-const mockOrders: Order[] = [
-  {
-    id: "1",
-    orderNumber: "ORD-1001",
-    status: "pending",
-    subtotal: 100,
-    tax: 10,
-    shipping: 5,
-    total: 115,
-    customerId: "c1",
-    userId: "u1",
-    notes: "Please deliver ASAP",
-    shippingAddress: "123 Main St",
-    billingAddress: "123 Main St",
-    trackingNumber: "TRK123",
-    estimatedDelivery: "2024-06-10T00:00:00Z",
-    shippedAt: null,
-    deliveredAt: null,
-    items: [
-      {
-        id: "item1",
-        quantity: 2,
-        product: {
-          id: "p1",
-          name: "Product 1",
-          sku: "SKU-001",
-          description: "A nice product",
-          categoryId: "cat1",
-          vendor: "Vendor 1",
-          collection: "Summer",
-          stock: "10",
-          price: "50",
-          image: "",
-          tags: [],
-        },
-        createdAt: "2024-06-01T10:00:00Z",
-        updatedAt: "2024-06-01T10:00:00Z",
-      },
-    ],
-    customer: {
-      id: "c1",
-      name: "John Doe",
-      email: "john@example.com",
-      phoneNumber: "1234567890",
-      address: "123 Main St",
-    },
-    createdAt: "2024-06-01T10:00:00Z",
-    updatedAt: "2024-06-01T10:00:00Z",
-  },
-  {
-    id: "2",
-    orderNumber: "ORD-1002",
-    status: "completed",
-    subtotal: 200,
-    tax: 20,
-    shipping: 10,
-    total: 230,
-    customerId: "c2",
-    userId: "u2",
-    notes: "",
-    shippingAddress: "456 Elm St",
-    billingAddress: "456 Elm St",
-    trackingNumber: "TRK456",
-    estimatedDelivery: "2024-06-12T00:00:00Z",
-    shippedAt: "2024-06-05T12:00:00Z",
-    deliveredAt: "2024-06-08T15:00:00Z",
-    items: [
-      {
-        id: "item2",
-        quantity: 1,
-        product: {
-          id: "p2",
-          name: "Product 2",
-          sku: "SKU-002",
-          description: "Another product",
-          categoryId: "cat2",
-          vendor: "Vendor 2",
-          collection: "Winter",
-          stock: "5",
-          price: "200",
-          image: "",
-          tags: [],
-        },
-        createdAt: "2024-06-02T11:00:00Z",
-        updatedAt: "2024-06-02T11:00:00Z",
-      },
-    ],
-    customer: {
-      id: "c2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phoneNumber: "0987654321",
-      address: "456 Elm St",
-    },
-    createdAt: "2024-06-02T11:00:00Z",
-    updatedAt: "2024-06-08T15:00:00Z",
-  },
-];
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState, AppDispatch } from "@/app/store";
+import { getOrders } from "@/services/order/order.action";
+import type { Order } from "@/services/order/order.action";
 
 const OrderLists = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { orders, loading } = useSelector((state: RootState) => ({
+    orders: state.orders.orders,
+    loading: state.orders.loading,
+  }));
+
   useEffect(() => {
-    setOrders(mockOrders);
-  }, []);
+    dispatch(getOrders({}));
+  }, [dispatch]);
 
   return (
     <div className="p-6">
@@ -262,55 +116,68 @@ const OrderLists = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map((order) => (
-                <tr key={order.id}>
-                  <td className="px-6 py-4 whitespace-nowrap font-semibold">
-                    {order.orderNumber}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {order.customer?.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        order.status === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : order.status === "cancelled"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    ${order.total}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      className="text-blue-600 hover:text-blue-900"
-                      onClick={() => navigate(`/orders/${order.id}`)}
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {orders.length === 0 && (
+              {loading ? (
                 <tr>
                   <td
                     colSpan={6}
                     className="px-6 py-4 text-center text-gray-500"
                   >
-                    No orders found.
+                    Loading...
                   </td>
                 </tr>
+              ) : (
+                <>
+                  {orders.map((order: Order) => (
+                    <tr key={order.id}>
+                      <td className="px-6 py-4 whitespace-nowrap font-semibold">
+                        {order.orderNumber}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {order.customer?.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            order.status === "completed"
+                              ? "bg-green-100 text-green-800"
+                              : order.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : order.status === "cancelled"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        ${order.total}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          className="text-blue-600 hover:text-blue-900"
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {orders.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-6 py-4 text-center text-gray-500"
+                      >
+                        No orders found.
+                      </td>
+                    </tr>
+                  )}
+                </>
               )}
             </tbody>
           </table>
