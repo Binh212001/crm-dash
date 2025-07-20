@@ -36,10 +36,17 @@ export interface UserData {
   };
 }
 
+// Interface for getUsers params
+export interface GetUsersParams {
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
 // Get all users with optional filters
 export const getUsers = createAsyncThunk(
   "users/getAll",
-  async (filter: UserFilter, { rejectWithValue }) => {
+  async (filter: GetUsersParams = {}, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/user", {
         params: {

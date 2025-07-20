@@ -9,16 +9,17 @@ import {
   MdList,
   MdLogout,
   MdPeople,
-  MdReceipt,
   MdSettings,
 } from "react-icons/md";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
+import axiosInstance from "@/app/axiosInstance";
 
 interface NavItem {
   name: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
 }
 
 const mainNav: NavItem[] = [
@@ -34,11 +35,6 @@ const pagesNav: NavItem[] = [
   { name: "Calender", href: "/calender", icon: MdCalendarToday },
   { name: "To-Do", href: "/todo", icon: MdCheckBox },
   { name: "Pricing", href: "/pricing", icon: MdAttachMoney },
-];
-
-const bottomNav: NavItem[] = [
-  { name: "Settings", href: "/settings", icon: MdSettings },
-  { name: "Logout", href: "/logout", icon: MdLogout },
 ];
 
 const SidebarSection = ({
@@ -61,6 +57,29 @@ const SidebarSection = ({
         {items.map((item) => {
           const isActive = location.pathname === item.href;
           const IconComponent = item.icon;
+          // If item has onClick, render as button, else as Link
+          if (item.onClick) {
+            return (
+              <button
+                key={item.name}
+                onClick={item.onClick}
+                className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors
+                  ${
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-primary hover:text-white"
+                  }`}
+                type="button"
+              >
+                <IconComponent
+                  className={`mr-3 h-5 w-5 ${
+                    isActive ? "text-white" : "text-gray-400"
+                  }`}
+                />
+                {item.name}
+              </button>
+            );
+          }
           return (
             <Link
               key={item.name}
@@ -87,6 +106,33 @@ const SidebarSection = ({
 };
 
 const Layout = () => {
+  const navigate = useNavigate();
+
+  // Remove tokens and user info from localStorage and redirect to login
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("/auth/logout");
+    } catch {
+      // Optionally handle error
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      navigate("/auth/login");
+    }
+  };
+
+  // Move Logout to a button with onClick
+  const bottomNav: NavItem[] = [
+    { name: "Settings", href: "/settings", icon: MdSettings },
+    {
+      name: "Logout",
+      href: "#",
+      icon: MdLogout,
+      onClick: handleLogout,
+    },
+  ];
+
   return (
     <div className="min-h-screen flex bg-main-primary text-primary-txt">
       {/* Sidebar */}

@@ -1,4 +1,8 @@
-import { EmailField, PasswordField, StringField, StringFieldOptional, UserNameField } from '@/decorators/field.decorators';
+import {
+  EmailField,
+  PasswordField,
+  StringField,
+} from "@/decorators/field.decorators";
 
 export class SignUpDto {
   @EmailField()
@@ -8,9 +12,5 @@ export class SignUpDto {
   password: string;
 
   @StringField()
-  firstName: string;
-
-  @StringField()
-  lastName: string;
-
+  name: string;
 }

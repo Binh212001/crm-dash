@@ -61,7 +61,7 @@ export class AuthService {
   }
 
   async signUp(dto: SignUpDto): Promise<AuthResponseDto> {
-    const { email, password, firstName, lastName } = dto;
+    const { email, password } = dto;
 
     // Check if user already exists
     const existingUser = await this.userService.findByEmail(email);

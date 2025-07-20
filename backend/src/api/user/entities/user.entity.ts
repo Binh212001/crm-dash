@@ -28,8 +28,8 @@ export class UserEntity extends AbstractEntity {
     default: "",
   })
   name: string;
-  @Column()
-  @Index("UQ_user_email", { where: '"deleted_at" IS NULL', unique: true })
+  @Column({ unique: true })
+  @Index("UQ_user_email", { unique: true, where: '"deleted_at" IS NULL' })
   email!: string;
 
   @Column({ default: "" })

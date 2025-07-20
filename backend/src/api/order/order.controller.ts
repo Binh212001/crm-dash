@@ -5,14 +5,18 @@ import { ListOrderDto } from "./dto/list-order.dto";
 import { OrderResponseDto } from "./dto/order-response.dto";
 import { OrderStatus } from "./entities/order.entity";
 import { OrderService } from "./order.service";
+import { CurrentUser } from "@/decorators/current-user.decorator";
 
 @Controller("orders")
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  async create(@Body() data: CreateOrderDto): Promise<OrderResponseDto> {
-    return this.orderService.create(data);
+  async create(
+    @Body() data: CreateOrderDto,
+    @CurrentUser("id") userId: string
+  ): Promise<OrderResponseDto> {
+    return this.orderService.create(data, userId);
   }
 
   @Get()

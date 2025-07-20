@@ -14,9 +14,6 @@ export class CreateOrderDto extends CreateBaseReqDto {
   @StringFieldOptional({ maxLength: 50 })
   orderNumber?: string;
 
-  @EnumFieldOptional(() => OrderStatus)
-  status?: OrderStatus;
-
   @NumberField({ min: 0 })
   subtotal: number;
 
@@ -31,9 +28,6 @@ export class CreateOrderDto extends CreateBaseReqDto {
 
   @UUIDFieldOptional()
   customerId?: string;
-
-  @UUIDFieldOptional()
-  userId?: string;
 
   @StringFieldOptional()
   notes?: string;

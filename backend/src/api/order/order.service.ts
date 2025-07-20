@@ -17,21 +17,13 @@ import { UserRepository } from "../user/user.repository";
 import { OrderOverviewDto } from "./dto/order-overview.dto";
 
 @Injectable()
-export class OrderService extends BaseService<
-  OrderEntity,
-  OrderResponseDto,
-  CreateOrderDto,
-  UpdateOrderDto,
-  ListOrderDto
-> {
+export class OrderService {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly orderItemRepository: OrderItemRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly userRepository: UserRepository
-  ) {
-    super(orderRepository);
-  }
+  ) {}
 
   async findAll(
     dto: ListOrderDto
@@ -86,8 +78,8 @@ export class OrderService extends BaseService<
     return plainToInstance(OrderResponseDto, order);
   }
 
-  async create(dto: CreateOrderDto): Promise<OrderResponseDto> {
-    const { items, customerId, userId, ...orderData } = dto;
+  async create(dto: CreateOrderDto, userId: string): Promise<OrderResponseDto> {
+    const { items, customerId, ...orderData } = dto;
 
     // Generate order number if not provided
     if (!orderData.orderNumber) {

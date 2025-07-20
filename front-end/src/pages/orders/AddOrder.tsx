@@ -10,6 +10,7 @@ import { DropdownCustom } from "@/components/DropdownCustom";
 import { useAppDispatch, useAppSelector } from "@/app/hook";
 import { getCustomers } from "@/services/customer/customer.action";
 import { getProducts, type Product } from "@/services/product/product.action"; // You need to have this action
+import axiosInstance from "@/app/axiosInstance";
 
 interface OrderItem {
   productId: string;
@@ -169,7 +170,11 @@ const AddOrder: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    alert("Order created!\n" + JSON.stringify(form, null, 2));
+    axiosInstance.post("/orders", form).catch((error) => {
+      alert(
+        error?.response?.data?.message || error?.message || "Đã xảy ra lỗi"
+      );
+    });
   };
 
   // Handle product search for each item

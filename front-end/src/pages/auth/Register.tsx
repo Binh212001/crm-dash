@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = "http://localhost:8000";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
+    name: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -26,55 +25,53 @@ const Register = () => {
       !formData.email ||
       !formData.password ||
       !formData.confirmPassword ||
-      !formData.firstName ||
-      !formData.lastName
+      !formData.name
     ) {
-      setError('Vui lòng điền đầy đủ thông tin.');
+      setError("Vui lòng điền đầy đủ thông tin.");
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu không khớp.');
+      setError("Mật khẩu không khớp.");
       return;
     }
 
     setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-        })
+          name: formData.name,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || 'Đăng ký thất bại');
+        setError(data.message || "Đăng ký thất bại");
         setLoading(false);
         return;
       }
 
       // Save tokens to localStorage
       if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem("accessToken", data.accessToken);
       }
       if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
       }
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
 
       // Redirect to dashboard or home page
-      navigate('/');
+      navigate("/");
     } catch {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.');
+      setError("Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -92,9 +89,15 @@ const Register = () => {
           <h2 className="text-center text-3xl font-extrabold text-gray-900 mb-2">
             Đăng ký tài khoản
           </h2>
-          <p className="text-gray-500 text-sm">Tạo tài khoản mới để bắt đầu sử dụng!</p>
+          <p className="text-gray-500 text-sm">
+            Tạo tài khoản mới để bắt đầu sử dụng!
+          </p>
         </div>
-        <form className="mt-6 space-y-6" onSubmit={handleSubmit} autoComplete="off">
+        <form
+          className="mt-6 space-y-6"
+          onSubmit={handleSubmit}
+          autoComplete="off"
+        >
           {error && (
             <div className="mb-2 text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 text-xs">
               {error}
@@ -102,37 +105,31 @@ const Register = () => {
           )}
           <div className="space-y-4">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Họ
               </label>
               <input
-                id="firstName"
+                id="name"
                 type="text"
                 required
                 className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 text-gray-900 transition"
                 placeholder="Nhập họ của bạn"
-                value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 disabled={loading}
               />
             </div>
+
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                Tên
-              </label>
-              <input
-                id="lastName"
-                type="text"
-                required
-                className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 text-gray-900 transition"
-                placeholder="Nhập tên của bạn"
-                value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email
               </label>
               <input
@@ -142,12 +139,17 @@ const Register = () => {
                 className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 text-gray-900 transition"
                 placeholder="Nhập email của bạn"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 disabled={loading}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Mật khẩu
               </label>
               <div className="relative">
@@ -158,7 +160,9 @@ const Register = () => {
                   className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 text-gray-900 transition"
                   placeholder="Nhập mật khẩu"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   disabled={loading}
                 />
                 <button
@@ -168,7 +172,12 @@ const Register = () => {
                   tabIndex={-1}
                 >
                   {showPassword ? (
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -177,7 +186,12 @@ const Register = () => {
                       />
                     </svg>
                   ) : (
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -190,7 +204,10 @@ const Register = () => {
               </div>
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Xác nhận mật khẩu
               </label>
               <div className="relative">
@@ -201,7 +218,12 @@ const Register = () => {
                   className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 text-gray-900 transition"
                   placeholder="Nhập lại mật khẩu"
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
                   disabled={loading}
                 />
                 <button
@@ -211,7 +233,12 @@ const Register = () => {
                   tabIndex={-1}
                 >
                   {showConfirmPassword ? (
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -220,7 +247,12 @@ const Register = () => {
                       />
                     </svg>
                   ) : (
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -239,7 +271,7 @@ const Register = () => {
               className="w-full flex justify-center py-2 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400"
               disabled={loading}
             >
-              {loading ? 'Đang đăng ký...' : 'Đăng ký'}
+              {loading ? "Đang đăng ký..." : "Đăng ký"}
             </button>
           </div>
         </form>

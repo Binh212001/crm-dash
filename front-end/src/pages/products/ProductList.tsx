@@ -86,7 +86,7 @@ const ProductList: React.FC = () => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-50 text-gray-700 text-sm">
-              <th className="px-4 py-3 text-left font-medium">ID</th>
+              <th className="px-4 py-3 text-left font-medium">SKU</th>
               <th className="px-4 py-3 text-left font-medium">Product Name</th>
               <th className="px-4 py-3 text-left font-medium">Category</th>
               <th className="px-4 py-3 text-left font-medium">Vendor</th>
@@ -115,7 +115,7 @@ const ProductList: React.FC = () => {
                   key={product.id}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
-                  <td className="px-4 py-3">{product.id}</td>
+                  <td className="px-4 py-3">{product.sku}</td>
                   <td className="flex items-center gap-3  px-4 py-3">
                     <img src={product.image} className="size-24 rounded-xl" />
                     <span className="font-bold">{product.name}</span>

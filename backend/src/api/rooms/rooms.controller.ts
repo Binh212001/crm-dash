@@ -1,19 +1,16 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
-import { ChatsService } from '../chats/chats.service';
-import { GetChatDto } from '../chats/dto/get-chat.dto';
-import { CreateRoomDto } from './dto/create-room.dto';
-import { RoomsService } from './rooms.service';
-import { CurrentUser } from '@/decorators/current-user.decorator';
-import { UserResponseDto } from '../user/dto/user-response.dto';
-import { ListBaseReqDto } from '../base/dto/list-base.req.dto';
+import { CurrentUser } from "@/decorators/current-user.decorator";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { ApiParam } from "@nestjs/swagger";
+import { ListBaseReqDto } from "../base/dto/list-base.req.dto";
+import { ChatsService } from "../chats/chats.service";
+import { UserResponseDto } from "../user/dto/user-response.dto";
+import { CreateRoomDto } from "./dto/create-room.dto";
+import { RoomsService } from "./rooms.service";
+import { GetRoomMessageReqDto } from "./dto/get-room-message.req";
 
-@Controller('rooms')
+@Controller("rooms")
 export class RoomsController {
-  constructor(
-    private readonly roomsService: RoomsService,
-    private readonly chatsService: ChatsService,
-  ) {}
+  constructor(private readonly roomsService: RoomsService) {}
 
   @Post()
   create(
@@ -24,18 +21,15 @@ export class RoomsController {
   }
 
   @Get()
-  getByRequest(
-    @CurrentUser() user: UserResponseDto
-  ) {
-    return this.roomsService.getByRequest(user.id);
+  getUserRooms(@CurrentUser() user: UserResponseDto) {
+    return this.roomsService.getUserRooms(user.id);
   }
 
-  @Get(':id/chats')
-  @ApiParam({ name: 'id', required: true })
-  getChats(
-    @Param('id') id: string,
-    @Query() dto: ListBaseReqDto
+  @Get("/message")
+  getRoomMessages(
+    @CurrentUser() user: UserResponseDto,
+    @Query() dto: GetRoomMessageReqDto
   ) {
-    return this.chatsService.findAll(id , dto);
+    return this.roomsService.getRoomMessages(user.id, dto);
   }
 }
