@@ -1,5 +1,6 @@
+import { OrderEntity } from "@/api/order/entities/order.entity";
 import { AbstractEntity } from "@/database/entities/abstract.entity";
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { v7 } from "uuid";
 
 @Entity("customers")
@@ -29,7 +30,7 @@ export class CustomerEntity extends AbstractEntity {
   postalCode?: string;
 
   @Column({ default: 0 })
-  orders: number;
+  totalOrder: number;
 
   @Column({ type: "decimal", default: 0 })
   totalSpent: number;
@@ -45,6 +46,9 @@ export class CustomerEntity extends AbstractEntity {
 
   @Column({ type: "simple-array", nullable: true })
   tags?: string[];
+
+  @OneToMany(() => OrderEntity, (order) => order.customer)
+  orderEntities: OrderEntity[];
 
   constructor(data?: Partial<CustomerEntity>) {
     super();

@@ -1,10 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { CustomerService } from './customer.service';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { ListCustomerDto } from './dto/list-customer.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from "@nestjs/common";
+import { CustomerService } from "./customer.service";
+import { CreateCustomerDto } from "./dto/create-customer.dto";
+import { UpdateCustomerDto } from "./dto/update-customer.dto";
+import { ListCustomerDto } from "./dto/list-customer.dto";
+import { CustomerResponseDto } from "./dto/customer-response.dto";
+import { TopCustomerDto } from "./dto/top-customer.dto";
 
-@Controller('customer')
+@Controller("customer")
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
@@ -18,19 +29,24 @@ export class CustomerController {
     return this.customerService.findAll(dto);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
+  @Get("/top")
+  async getTopCustomer(): Promise<TopCustomerDto[]> {
+    return this.customerService.getTopCustomer();
+  }
+
+  @Get(":id")
+  async findOne(@Param("id") id: string) {
     return this.customerService.findOne(id);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateCustomerDto) {
+  @Put(":id")
+  async update(@Param("id") id: string, @Body() data: UpdateCustomerDto) {
     return this.customerService.update(id, data);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
     await this.customerService.remove(id);
     return { deleted: true };
   }
-} 
+}

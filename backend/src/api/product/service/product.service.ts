@@ -108,4 +108,15 @@ export class ProductService {
     await this.productRepository.remove(product);
     return { message: "Product removed", id };
   }
+
+  async getTopProduct() {
+    const topProducts = await this.productRepository.find({
+      order: { sold: "DESC" },
+      take: 5,
+    });
+
+    return plainToInstance(ProductResponseDto, topProducts, {
+      excludeExtraneousValues: true,
+    });
+  }
 }

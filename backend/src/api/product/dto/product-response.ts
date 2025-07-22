@@ -25,6 +25,8 @@ export class ProductResponseDto {
   stock?: string;
   @Expose()
   price?: string;
+  @Expose()
+  sold?: number;
 
   @Expose()
   image?: string;

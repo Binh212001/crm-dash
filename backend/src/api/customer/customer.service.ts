@@ -8,6 +8,7 @@ import { CustomerEntity } from "./entities/customer.entity";
 import { paginate } from "@/utils/offset-pagination";
 import { OffsetPaginatedDto } from "@/common/dto/offset-pagination/paginated.dto";
 import { ListCustomerDto } from "./dto/list-customer.dto";
+import { TopCustomerDto } from "./dto/top-customer.dto";
 
 @Injectable()
 export class CustomerService {
@@ -65,5 +66,23 @@ export class CustomerService {
 
   async remove(id: string): Promise<void> {
     await this.customerRepository.delete(id);
+  }
+
+  async getTopCustomer(): Promise<TopCustomerDto[]> {
+    // Lấy top 5 khách hàng có tổng số đơn hàng cao nhất (dựa vào trường totalOrder trong customer entity)
+    const customers = await this.customerRepository
+      .createQueryBuilder("customer")
+      .orderBy("customer.totalOrder", "DESC")
+      .limit(5)
+      .getMany();
+
+    // Trả về theo định dạng TopCustomerDto
+    const customerRes: TopCustomerDto[] = customers.map((c) => ({
+      customer: c.name,
+      orderCount: c.totalOrder,
+      revenue: Number(c.totalSpent) || 0,
+    }));
+
+    return customerRes;
   }
 }

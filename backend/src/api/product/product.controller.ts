@@ -18,6 +18,7 @@ import {
   BunnyUploadInterceptor,
   BunnyUploadRes,
 } from "../bunny/bunny-file-interceptor";
+import { ProductResponseDto } from "./dto/product-response";
 
 @Controller("products")
 export class ProductController {
@@ -33,6 +34,11 @@ export class ProductController {
   @Get()
   findAll(@Query() dto: ListBaseReqDto) {
     return this.productService.findAll(dto);
+  }
+
+  @Get("/top")
+  getTopProduct(): Promise<ProductResponseDto[]> {
+    return this.productService.getTopProduct();
   }
 
   @Get(":id")

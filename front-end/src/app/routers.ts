@@ -20,6 +20,7 @@ import AddUser from "../pages/user/AddUser";
 import UpdateUser from "../pages/user/UpdateUser";
 import UserList from "../pages/user/User";
 import RoomChat from "@/pages/communication/RoomChat";
+import Settings from "@/pages/system/Settings";
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: "update-customer/:id", Component: UpdateCustomer },
       { path: "update-product/:id", Component: UpdateProduct },
       { path: "order/detail/:id", Component: OrderDetail },
+      { path: "Settings", Component: Settings },
     ],
   },
   {

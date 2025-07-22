@@ -7,7 +7,6 @@ import {
   JoinTable,
   ManyToOne,
   JoinColumn,
-  OneToMany,
   Relation,
 } from "typeorm";
 import { v7 } from "uuid";
@@ -53,6 +52,9 @@ export class ProductEntity extends AbstractEntity {
     inverseJoinColumn: { name: "tagId", referencedColumnName: "id" },
   })
   tags?: Relation<TagEntity>[];
+
+  @Column({ default: 0 })
+  sold: number;
 
   @Column({ nullable: true })
   image?: string;
