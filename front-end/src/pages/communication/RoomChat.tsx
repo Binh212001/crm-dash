@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, use } from "react";
 import axiosInstance from "@/app/axiosInstance";
 import { useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
@@ -20,6 +20,7 @@ function RoomChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const socketRef = useRef<Socket | null>(null);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Tách logic fetch messages và socket ra thành 2 useEffect riêng biệt
   // Fetch messages for the room from backend when roomId changes
@@ -49,16 +50,13 @@ function RoomChat() {
 
     // Only create socket if not already created
     if (!socketRef.current) {
-      // Get token from localStorage (or wherever you store it)
       const token = localStorage.getItem("accessToken");
       socketRef.current = io("http://localhost:3000", {
         transports: ["polling", "websocket"],
         reconnectionAttempts: 5,
         extraHeaders: {},
         timeout: 10000,
-        auth: {
-          token: token ? `Bearer ${token}` : undefined,
-        },
+        auth: { token: token ? `Bearer ${token}` : undefined },
       });
     }
 
@@ -88,23 +86,14 @@ function RoomChat() {
     };
   }, [roomId]);
 
-  // Use the correct event name and payload structure as expected by chats.gateway.ts ("createMessage")
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     // Send message to backend via socket if connected
     if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit("createMessage", {
-        roomId,
-        content: input,
-        sender: {
-          id: "0198269d-0abc-732b-9007-7c893a72484c",
-          name: "Bạn",
-        },
-      });
+      socketRef.current.emit("createMessage", { roomId, content: input });
     }
-
     setInput("");
   };
 
@@ -117,29 +106,29 @@ function RoomChat() {
           <div className="text-gray-500">Chưa có tin nhắn nào.</div>
         )}
         {!loading &&
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.sender.name === "Bạn" || msg.sender.id === "me"
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
+          messages.map((msg) => {
+            const isMe = msg.sender.id === user.id;
+
+            return (
               <div
-                className={`px-4 py-2 rounded-lg max-w-xs ${
-                  msg.sender.name === "Bạn" || msg.sender.id === "me"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-800"
-                }`}
+                key={msg.id}
+                className={`flex ${isMe ? "justify-end" : "justify-start"}`}
               >
-                <span className="block text-xs font-semibold mb-1">
-                  {msg.sender.name}
-                </span>
-                <span>{msg.content}</span>
+                <div
+                  className={`px-4 py-2 rounded-lg max-w-xs ${
+                    isMe
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  <span className="block text-xs font-semibold mb-1">
+                    {msg.sender.name}
+                  </span>
+                  <span>{msg.content}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
       </div>
       {/* Form gửi tin nhắn */}
       <form
