@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import InputText from "../../components/InputText";
 import { useAppDispatch } from "@/app/hook";
-import {
-  createCustomer,
-  type Customer,
-} from "@/services/customer/customer.action";
+import { createCustomer } from "@/services/customer/customer.action";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AddCustomer = () => {
   const dispatch = useAppDispatch();
@@ -42,7 +40,7 @@ const AddCustomer = () => {
     e.preventDefault();
     setSubmitting(true);
 
-    const customerData: Customer = {
+    const customerData = {
       name: form.name,
       email: form.email,
       ...(form.phone && { phone: form.phone }),
@@ -54,8 +52,14 @@ const AddCustomer = () => {
 
     try {
       await dispatch(createCustomer(customerData)).unwrap();
+      toast.success("Customer created successfully!");
       navigate("/customers");
-    } catch (err) {
+    } catch (err: any) {
+      toast.error(
+        err?.message
+          ? `Failed to create customer: ${err.message}`
+          : "Failed to create customer"
+      );
       console.log("🚀 ~ handleSubmit ~ err:", err);
     } finally {
       setSubmitting(false);

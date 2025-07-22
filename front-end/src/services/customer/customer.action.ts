@@ -14,6 +14,17 @@ export interface Customer {
   lastOrder?: string;
   avatar?: string;
 }
+export interface CreateCustomer {
+  name: string;
+  email: string;
+  orders?: number;
+  ordersCount?: number;
+  totalSpent?: number;
+  city?: string;
+  lastSeen?: string;
+  lastOrder?: string;
+  avatar?: string;
+}
 
 export interface CustomerData {
   data: Customer[];
@@ -68,7 +79,7 @@ export const getCustomerById = createAsyncThunk(
 // Create a new customer
 export const createCustomer = createAsyncThunk(
   "customers/create",
-  async (customer: Customer, { rejectWithValue }) => {
+  async (customer: CreateCustomer, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post("/customer", customer);
       return response.data;

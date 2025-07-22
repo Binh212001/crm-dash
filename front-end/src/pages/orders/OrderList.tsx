@@ -1,10 +1,12 @@
-import { useNavigate } from "react-router";
-import OrderOverview from "./OrderOverview";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState, AppDispatch } from "@/app/store";
-import { getOrders } from "@/services/order/order.action";
+import axiosInstance from "@/app/axiosInstance";
+import type { AppDispatch, RootState } from "@/app/store";
 import type { Order } from "@/services/order/order.action";
+import { getOrders } from "@/services/order/order.action";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router";
+import { ToastContainer, toast } from "react-toastify";
+import OrderOverview from "./OrderOverview";
 
 const OrderLists = () => {
   const navigate = useNavigate();
@@ -14,12 +16,48 @@ const OrderLists = () => {
     loading: state.orders.loading,
   }));
 
+  // State for popup confirmation
+  const [confirmStatus, setConfirmStatus] = useState<{
+    orderId: string | null;
+    newStatus: string | null;
+  }>({ orderId: null, newStatus: null });
+
   useEffect(() => {
     dispatch(getOrders({}));
   }, [dispatch]);
 
+  // Handler for status change (show popup)
+  const handleChangeStatus = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    id: string
+  ) => {
+    const newStatus = e.target.value;
+    setConfirmStatus({ orderId: id, newStatus });
+  };
+
+  const handleConfirmStatus = async () => {
+    if (!confirmStatus.orderId || !confirmStatus.newStatus) return;
+    try {
+      await axiosInstance.put(`/orders/${confirmStatus.orderId}/status`, {
+        status: confirmStatus.newStatus,
+      });
+      dispatch(getOrders({}));
+      toast.success("Cập nhật trạng thái đơn hàng thành công!");
+    } catch (error) {
+      console.error("Failed to update order status", error);
+      toast.error("Cập nhật trạng thái đơn hàng thất bại!");
+    }
+    setConfirmStatus({ orderId: null, newStatus: null });
+  };
+
+  // Handler for cancelling status change
+  const handleCancelStatus = () => {
+    setConfirmStatus({ orderId: null, newStatus: null });
+  };
+
   return (
     <div className="p-6">
+      <ToastContainer />
       <h1 className="text-2xl font-bold mb-4">Order Lists</h1>
       <OrderOverview />
 
@@ -136,20 +174,14 @@ const OrderLists = () => {
                         {order.customer?.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            order.status === "completed"
-                              ? "bg-green-100 text-green-800"
-                              : order.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : order.status === "cancelled"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleChangeStatus(e, order.id)}
                         >
-                          {order.status.charAt(0).toUpperCase() +
-                            order.status.slice(1)}
-                        </span>
+                          <option value="pending">Pending</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         ${order.total}
@@ -160,7 +192,7 @@ const OrderLists = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           className="text-blue-600 hover:text-blue-900"
-                          onClick={() => navigate(`/orders/${order.id}`)}
+                          onClick={() => navigate(`/order/detail/${order.id}`)}
                         >
                           View
                         </button>
@@ -183,6 +215,35 @@ const OrderLists = () => {
           </table>
         </div>
       </div>
+
+      {/* Popup xác nhận khi đổi trạng thái */}
+      {confirmStatus.orderId && confirmStatus.newStatus && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">
+              Xác nhận thay đổi trạng thái
+            </h2>
+            <p className="mb-6">
+              Bạn có chắc chắn muốn đổi trạng thái đơn hàng này thành{" "}
+              <span className="font-bold">{confirmStatus.newStatus}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+                onClick={handleCancelStatus}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                onClick={handleConfirmStatus}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

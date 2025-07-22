@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import InputText from "../../components/InputText";
 import axiosInstance from "@/app/axiosInstance";
+import { ToastContainer, toast } from "react-toastify";
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -77,13 +78,18 @@ const AddUser = () => {
       }
 
       setLoading(false);
+      toast.success("User created successfully!");
       navigate("/users");
-    } catch (err: any) {
+    } catch (err) {
       setLoading(false);
-      setError(
-        err?.message ||
-          (typeof err === "string" ? err : "Failed to create user")
-      );
+      let errorMsg = "Failed to create user";
+      if (err && typeof err === "object" && "message" in err) {
+        errorMsg = (err as { message?: string }).message || errorMsg;
+      } else if (typeof err === "string") {
+        errorMsg = err;
+      }
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -94,6 +100,7 @@ const AddUser = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <ToastContainer />
       <div className="w-full mx-9 bg-white border border-gray-300 rounded-lg shadow p-6 flex flex-col md:flex-row gap-6">
         {/* Main Form */}
         <form

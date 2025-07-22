@@ -25,7 +25,7 @@ export class UserService {
   ): Promise<UserResponseDto> {
     const user = this.userRepository.create({
       ...data,
-      ...(files.length > 0 && {
+      ...(files?.length > 0 && {
         avatar: files[0].url,
       }),
     });

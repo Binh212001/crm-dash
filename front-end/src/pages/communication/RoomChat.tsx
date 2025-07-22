@@ -49,10 +49,16 @@ function RoomChat() {
 
     // Only create socket if not already created
     if (!socketRef.current) {
+      // Get token from localStorage (or wherever you store it)
+      const token = localStorage.getItem("accessToken");
       socketRef.current = io("http://localhost:3000", {
         transports: ["polling", "websocket"],
         reconnectionAttempts: 5,
+        extraHeaders: {},
         timeout: 10000,
+        auth: {
+          token: token ? `Bearer ${token}` : undefined,
+        },
       });
     }
 

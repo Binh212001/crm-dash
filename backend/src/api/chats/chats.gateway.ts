@@ -11,6 +11,9 @@ import {
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { ChatRepository } from "./chat.repository";
+import { UseGuards } from "@nestjs/common";
+import { WsJwtGuard } from "@/guards/ws-auth.graud";
+import { UserResponseDto } from "../user/dto/user-response.dto";
 import { CurrentUser } from "@/decorators/current-user.decorator";
 
 @WebSocketGateway(3000, {
@@ -52,48 +55,34 @@ export class ChatGateway
       client.emit("error", { message: "roomId is required to join a room." });
     }
   }
-
   @SubscribeMessage("createMessage")
+  @UseGuards(WsJwtGuard)
   async handleCreateMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody()
-    data: {
-      roomId: string;
-      content: string;
-      sender: {
-        id: string;
-        name: string;
-        avatar?: string;
-      };
-    }
+    @MessageBody() data: { roomId: string; content: string }
   ) {
-    const { roomId, content, sender } = data;
-    if (!roomId || !content || !sender || !sender.id) {
-      client.emit("error", {
-        message: "roomId, content, and sender are required.",
-      });
+    const { roomId, content } = data;
+    const { user } = client.data;
+
+    if (!roomId || !content) {
+      client.emit("error", { message: "roomId and content are required." });
       return;
     }
 
-    // Save the message to the database
     try {
+      // user is injected by WsJwtGuard (see ws-auth.graud.ts)
       const chat = this.chatRepository.create({
         room: { id: roomId },
         content,
-        sender: { id: sender.id },
+        sender: { id: user.id },
       });
       const savedChat = await this.chatRepository.save(chat);
 
-      // Build the message object to emit (including sender info)
       const message = {
         id: savedChat.id,
         roomId: savedChat.room.id,
         content: savedChat.content,
-        sender: {
-          id: sender.id,
-          name: sender.name,
-          avatar: sender.avatar,
-        },
+        sender: { id: user.id, name: user.name, avatar: user.avatar },
         createdAt: savedChat.createdAt,
       };
 

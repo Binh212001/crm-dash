@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hook";
 import { getCustomers } from "@/services/customer/customer.action";
 import { getProducts, type Product } from "@/services/product/product.action"; // You need to have this action
 import axiosInstance from "@/app/axiosInstance";
+import { toast } from "react-toastify";
 
 interface OrderItem {
   productId: string;
@@ -170,11 +171,18 @@ const AddOrder: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    axiosInstance.post("/orders", form).catch((error) => {
-      alert(
-        error?.response?.data?.message || error?.message || "Đã xảy ra lỗi"
-      );
-    });
+    axiosInstance
+      .post("/orders", form)
+      .then(() => {
+        toast.success("Tạo đơn hàng thành công!");
+        setForm(initialForm);
+        setSearchProducts([""]);
+      })
+      .catch((error) => {
+        toast.error(
+          error?.response?.data?.message || error?.message || "Đã xảy ra lỗi"
+        );
+      });
   };
 
   // Handle product search for each item

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import InputText from "../../components/InputText";
 import { Input } from "@/components/ui/input";
+import { ToastContainer, toast } from "react-toastify";
 
 const UpdateProduct: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,7 @@ const UpdateProduct: React.FC = () => {
     price: "",
     image: null as File | null,
     imagePreview: "" as string,
+    tags: [] as string[],
   });
 
   const [tagsInput, setTagsInput] = useState("");
@@ -45,9 +47,12 @@ const UpdateProduct: React.FC = () => {
           price: data.price?.toString() || "",
           image: null,
           imagePreview: data.image || "",
+          tags: Array.isArray(data.tags) ? data.tags : [],
         }));
-      } catch (err) {
+        setTagsInput(Array.isArray(data.tags) ? data.tags.join(", ") : "");
+      } catch {
         setError("Failed to fetch product data.");
+        toast.error("Failed to fetch product data.");
       }
       setFetching(false);
     };
@@ -103,6 +108,7 @@ const UpdateProduct: React.FC = () => {
         collection: form.collection,
         stock: form.stock,
         price: form.price,
+        tags: form.tags,
       };
 
       // Handle image upload for product
@@ -128,18 +134,21 @@ const UpdateProduct: React.FC = () => {
       }
 
       setLoading(false);
+      toast.success("Product updated successfully!");
       navigate("/products");
     } catch (err) {
       setLoading(false);
-      if (err && typeof err === "object" && "message" in (err as any)) {
-        setError(
-          (err as { message?: string }).message || "Failed to update product"
-        );
+      let errorMsg = "Failed to update product";
+      if (err && typeof err === "object" && "message") {
+        errorMsg = (err as { message?: string }).message || errorMsg;
+        setError(errorMsg);
       } else if (typeof err === "string") {
-        setError(err);
+        errorMsg = err;
+        setError(errorMsg);
       } else {
-        setError("Failed to update product");
+        setError(errorMsg);
       }
+      toast.error(errorMsg);
     }
   };
 
@@ -153,6 +162,7 @@ const UpdateProduct: React.FC = () => {
 
   return (
     <div className="min-h-screen p-6">
+      <ToastContainer />
       <form onSubmit={handleSubmit}>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Main Form */}

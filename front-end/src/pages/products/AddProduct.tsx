@@ -1,12 +1,10 @@
 import axiosInstance from "@/app/axiosInstance";
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { ToastContainer, toast } from "react-toastify";
 import InputText from "../../components/InputText";
 import { Input } from "@/components/ui/input";
 
 const AddProduct: React.FC = () => {
-  // Remove unused navigate
-  // const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,23 +101,27 @@ const AddProduct: React.FC = () => {
       }
 
       setLoading(false);
+      toast.success("Product created successfully!");
       // Optionally reset form or navigate
     } catch (err) {
       setLoading(false);
-      if (err && typeof err === "object" && "message" in (err as any)) {
-        setError(
-          (err as { message?: string }).message || "Failed to create product"
-        );
+      let errorMsg = "Failed to create product";
+      if (err && typeof err === "object" && "message") {
+        errorMsg = (err as { message?: string }).message || errorMsg;
+        setError(errorMsg);
       } else if (typeof err === "string") {
-        setError(err);
+        errorMsg = err;
+        setError(errorMsg);
       } else {
-        setError("Failed to create product");
+        setError(errorMsg);
       }
+      toast.error(errorMsg);
     }
   };
 
   return (
     <div className="min-h-screen p-6">
+      <ToastContainer />
       <form onSubmit={handleSubmit}>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Main Form */}
